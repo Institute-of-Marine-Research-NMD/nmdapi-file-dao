@@ -3,7 +3,6 @@ package no.imr.nmdapi.dao.file;
 import java.io.File;
 import java.io.IOException;
 import java.util.GregorianCalendar;
-import java.util.logging.Level;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -14,7 +13,6 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import no.imr.nmd.commons.dataset.jaxb.DatasetType;
 import no.imr.nmd.commons.dataset.jaxb.DatasetsType;
-import no.imr.nmd.commons.dataset.jaxb.ObjectFactory;
 import no.imr.nmd.commons.dataset.jaxb.QualityEnum;
 import no.imr.nmd.commons.dataset.jaxb.RestrictionsType;
 import no.imr.nmdapi.exceptions.AlreadyExistsException;
@@ -199,8 +197,8 @@ public class NMDDataDaoImpl implements NMDDataDao {
         }
         datasetType.setDescription("Datasett for ".concat(type));
         RestrictionsType restrictions = new RestrictionsType();
-        restrictions.setRead("unrestricted");
-        restrictions.setWrite("SG-FAG-430-NMD");
+        restrictions.setRead(configuration.getString("default.readrole"));
+        restrictions.setWrite(configuration.getString("default.writerole"));
         datasetType.setRestrictions(restrictions);
         datasetType.setQualityAssured(QualityEnum.NONE);
         String predir = configuration.getString("pre.data.dir");
@@ -223,7 +221,13 @@ public class NMDDataDaoImpl implements NMDDataDao {
         try {
             context = JAXBContext.newInstance("no.imr.nmd.commons.dataset.jaxb");
             Unmarshaller jaxbMarshaller = context.createUnmarshaller();
-            DatasetsType response = (DatasetsType) jaxbMarshaller.unmarshal(file);
+            Object objResponse = jaxbMarshaller.unmarshal(file);
+            DatasetsType response;
+            if (objResponse instanceof JAXBElement) {
+                response = (DatasetsType) ((JAXBElement)objResponse).getValue();
+            } else {
+                response = (DatasetsType) jaxbMarshaller.unmarshal(file);
+            }
             for (int i = 0;i < response.getDataset().size(); i++) {
                 DatasetType datasetType = response.getDataset().get(i);
                 if (datasetType.getDataType() != null && datasetType.getDataType().equalsIgnoreCase(type)) {
