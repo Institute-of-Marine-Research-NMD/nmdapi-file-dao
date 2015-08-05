@@ -64,4 +64,26 @@ public interface NMDDataDao {
      * @return  True if data exists.
      */
     boolean hasData(String missiontype, String year, String platform, String delivery);
+
+    /**
+     *
+     * @param missiontype
+     * @param year
+     * @param platform
+     * @param delivery
+     * @param type
+     * @return
+     */
+    void insertDataset(String missiontype, String year, String platform, String delivery, String type);
+
+    /**
+     *
+     * @param missiontype
+     * @param year
+     * @param platform
+     * @param delivery
+     * @param type
+     * @return
+     */
+    void deleteDataset(String missiontype, String year, String platform, String delivery, String type);
 }

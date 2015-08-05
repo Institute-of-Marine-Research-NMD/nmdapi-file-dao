@@ -2,11 +2,21 @@ package no.imr.nmdapi.dao.file;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.GregorianCalendar;
+import java.util.logging.Level;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+import no.imr.nmd.commons.dataset.jaxb.DatasetType;
+import no.imr.nmd.commons.dataset.jaxb.DatasetsType;
+import no.imr.nmd.commons.dataset.jaxb.ObjectFactory;
+import no.imr.nmd.commons.dataset.jaxb.QualityEnum;
+import no.imr.nmd.commons.dataset.jaxb.RestrictionsType;
 import no.imr.nmdapi.exceptions.AlreadyExistsException;
 import no.imr.nmdapi.exceptions.NotFoundException;
 import org.apache.commons.configuration.Configuration;
@@ -104,6 +114,19 @@ public class NMDDataDaoImpl implements NMDDataDao {
         return new File(predir + System.getProperty("file.separator") + missiontype + System.getProperty("file.separator") + year + System.getProperty("file.separator") + platform + System.getProperty("file.separator") + delivery + System.getProperty("file.separator") + postdir + System.getProperty("file.separator") + FILENAME);
     }
 
+    /**
+     *
+     * @param missiontype
+     * @param year
+     * @param platform
+     * @param delivery
+     * @param predir
+     * @return
+     */
+    private File getDatasetFile(final String missiontype, final String year, final String platform, final String delivery, final String predir) {
+        return new File(predir + System.getProperty("file.separator") + missiontype + System.getProperty("file.separator") + year + System.getProperty("file.separator") + platform + System.getProperty("file.separator") + delivery + System.getProperty("file.separator") + FILENAME);
+    }
+
     private <T> T getFile(final Class<T> classes, final File file) {
         try {
             JAXBContext context = JAXBContext.newInstance(classes.getPackage().getName());
@@ -160,6 +183,57 @@ public class NMDDataDaoImpl implements NMDDataDao {
             LOG.error("Error unmarshalling. ", ex);
         }
         return null; // TODO add throws if unmarshall fails.
+    }
+
+    public void insertDataset(String missiontype, String year, String platform, String delivery, String type) {
+        DatasetType datasetType = new DatasetType();
+        String id = "no:imr:".concat(type.toLowerCase()).concat(":").concat(type.toLowerCase()).concat(java.util.UUID.randomUUID().toString());
+        datasetType.setId(id);
+        XMLGregorianCalendar cal;
+        try {
+            cal = DatatypeFactory.newInstance().newXMLGregorianCalendar((GregorianCalendar)GregorianCalendar.getInstance());
+            datasetType.setCreated(cal);
+            datasetType.setUpdated(cal);
+        } catch (DatatypeConfigurationException ex) {
+            LOG.error("Error setting created time. ", ex);
+        }
+        datasetType.setDescription("Datasett for ".concat(type));
+        RestrictionsType restrictions = new RestrictionsType();
+        restrictions.setRead("unrestricted");
+        restrictions.setWrite("SG-FAG-430-NMD");
+        datasetType.setRestrictions(restrictions);
+        datasetType.setQualityAssured(QualityEnum.NONE);
+        String predir = configuration.getString("pre.data.dir");
+        File file = getDatasetFile(missiontype, year, platform, delivery, predir);
+        DatasetsType datasetsType;
+        if (file.exists()) {
+            datasetsType = getFile(DatasetsType.class, file);
+            datasetsType.getDataset().add(datasetType);
+        } else {
+            datasetsType = new DatasetsType();
+            datasetsType.getDataset().add(datasetType);
+        }
+        updateFile(DatasetsType.class, datasetsType, file);
+    }
+
+    public void deleteDataset(String missiontype, String year, String platform, String delivery, String type) {
+        String predir = configuration.getString("pre.data.dir");
+        JAXBContext context;
+        File file = getDatasetFile(missiontype, year, platform, delivery, predir);
+        try {
+            context = JAXBContext.newInstance("no.imr.nmd.commons.dataset.jaxb");
+            Unmarshaller jaxbMarshaller = context.createUnmarshaller();
+            DatasetsType response = (DatasetsType) jaxbMarshaller.unmarshal(file);
+            for (int i = 0;i < response.getDataset().size(); i++) {
+                DatasetType datasetType = response.getDataset().get(i);
+                if (datasetType.getDataType() != null && datasetType.getDataType().equalsIgnoreCase(type)) {
+                    response.getDataset().remove(i);
+                }
+            }
+            updateFile(DatasetsType.class, response, file);
+        } catch (JAXBException ex) {
+            LOG.error("Error unmarshalling. ", ex);
+        }
     }
 
 }

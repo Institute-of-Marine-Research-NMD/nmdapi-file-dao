@@ -76,5 +76,10 @@
             <artifactId>nmdapi-exceptions</artifactId>
             <version>0.0.2</version>
         </dependency>
+        <dependency>
+            <groupId>no.imr.nmd.commons.dataset.jaxb</groupId>
+            <artifactId>commons-dataset-jaxb</artifactId>
+            <version>1.0.1</version>
+        </dependency>
     </dependencies>
 </project>
