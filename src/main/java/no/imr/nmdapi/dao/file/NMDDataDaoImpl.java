@@ -200,6 +200,7 @@ public class NMDDataDaoImpl implements NMDDataDao {
         restrictions.setRead(configuration.getString("default.readrole"));
         restrictions.setWrite(configuration.getString("default.writerole"));
         datasetType.setRestrictions(restrictions);
+        datasetType.setDataType(type.toLowerCase());
         datasetType.setQualityAssured(QualityEnum.NONE);
         String predir = configuration.getString("pre.data.dir");
         File file = getDatasetFile(missiontype, year, platform, delivery, predir);

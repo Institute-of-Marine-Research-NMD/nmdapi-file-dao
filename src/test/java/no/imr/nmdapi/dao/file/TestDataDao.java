@@ -1,10 +1,6 @@
 package no.imr.nmdapi.dao.file;
 
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.assertTrue;
 import no.imr.nmdapi.dao.file.TestDataDao.Init;
 import no.imr.nmdapi.dao.file.config.CommonDaoConfig;
