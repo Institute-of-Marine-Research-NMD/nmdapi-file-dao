@@ -241,4 +241,48 @@ public class NMDDataDaoImpl implements NMDDataDao {
         }
     }
 
+    public <T> T get(String name, Class<T> clazz) {
+        String predir = configuration.getString("pre.data.dir");
+        File file = new File(predir + File.separator + name + File.separator + FILENAME);
+        if (file.exists()) {
+            return getFile(clazz, file);
+        } else {
+            throw new NotFoundException(file + " does not exist.");
+        }
+    }
+
+    public <T> void delete(String name) {
+        String predir = configuration.getString("pre.data.dir");
+        File file = new File(predir + File.separator + name + File.separator + FILENAME);
+        if (file.exists()) {
+            file.delete();
+        } else {
+            throw new NotFoundException(file + " does not exist.");
+        }
+    }
+
+    public <T> void update(String name, T data, Class<T> clazz) {
+        String predir = configuration.getString("pre.data.dir");
+        File file = new File(predir + File.separator + name + File.separator + FILENAME);
+        file.getParentFile().mkdirs();
+        updateFile(clazz, data, file);
+    }
+
+    public <T> void insert(String name, T data, Class<T> clazz) {
+        String predir = configuration.getString("pre.data.dir");
+        File file = new File(predir + File.separator + name + File.separator + FILENAME);
+        if (file.exists()) {
+            throw new AlreadyExistsException(file + " already exist.");
+        } else {
+            file.getParentFile().mkdirs();
+            createFile(clazz, data, file);
+        }
+    }
+
+    public boolean hasData(String name) {
+        String predir = configuration.getString("pre.data.dir");
+        File file = new File(predir + File.separator + name + File.separator + FILENAME);
+        return file.exists();
+    }
+
 }

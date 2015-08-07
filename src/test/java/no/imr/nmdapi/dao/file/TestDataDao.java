@@ -62,6 +62,30 @@ public class TestDataDao {
         assertFalse(nmdDataDao.hasData("1", "2", "3", "4"));
     }
 
+/**
+     *
+     */
+    @Test
+    public void testDoubleInsertUpdateDeleteSimple() {
+        TestType jaxbObject = new TestType();
+        jaxbObject.setData("test");
+        try {
+            nmdDataDao.insert("1", jaxbObject, TestType.class);
+            nmdDataDao.insert("1", jaxbObject, TestType.class);
+        } catch(AlreadyExistsException e) {
+
+        }
+        assertTrue(nmdDataDao.get("1", TestType.class).getData().equals("test"));
+        assertTrue(nmdDataDao.hasData("1"));
+
+        jaxbObject.setData("test2");
+        nmdDataDao.update("1", jaxbObject, TestType.class);
+        assertTrue(nmdDataDao.get("1", TestType.class).getData().equals("test2"));
+
+        nmdDataDao.delete("1");
+        assertFalse(nmdDataDao.hasData("1"));
+    }
+
     /**
      *
      */

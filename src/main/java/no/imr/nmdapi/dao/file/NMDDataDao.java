@@ -9,7 +9,44 @@ import java.io.File;
  * @author kjetilf
  */
 public interface NMDDataDao {
-   /**
+
+    /**
+     *
+     * @param <T>
+     * @param name
+     * @param clazz
+     * @return
+     */
+    <T> T get(String name, Class<T> clazz);
+
+    /**
+     *
+     * @param <T>
+     * @param name
+     */
+    <T> void delete(String name);
+
+    /**
+     *
+     * @param <T>
+     * @param name
+     * @param data
+     * @param clazz
+     */
+    <T> void update(String name, T data, Class<T> clazz);
+
+    /**
+     * 
+     * @param <T>
+     * @param name
+     * @param data
+     * @param clazz
+     */
+    <T> void insert(String name, T data, Class<T> clazz);
+
+    boolean hasData(String name);
+
+     /**
      * Return data.
      *
      * @param <T>   Type of class to return.
