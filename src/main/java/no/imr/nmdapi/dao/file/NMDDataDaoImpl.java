@@ -301,8 +301,11 @@ public class NMDDataDaoImpl implements NMDDataDao {
         }
         File file = new File(dir.toString());
         List<String> names = new ArrayList<String>();
-        for (String name : file.list()) {
-            names.add(name);
+        String[] files = file.list();
+        if (files != null) {
+            for (String name : files) {
+                names.add(name);
+            }
         }
         return names;
     }
