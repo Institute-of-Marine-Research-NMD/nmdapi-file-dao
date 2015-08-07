@@ -2,7 +2,9 @@ package no.imr.nmdapi.dao.file;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
+import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -189,7 +191,7 @@ public class NMDDataDaoImpl implements NMDDataDao {
         datasetType.setId(id);
         XMLGregorianCalendar cal;
         try {
-            cal = DatatypeFactory.newInstance().newXMLGregorianCalendar((GregorianCalendar)GregorianCalendar.getInstance());
+            cal = DatatypeFactory.newInstance().newXMLGregorianCalendar((GregorianCalendar) GregorianCalendar.getInstance());
             datasetType.setCreated(cal);
             datasetType.setUpdated(cal);
         } catch (DatatypeConfigurationException ex) {
@@ -225,11 +227,11 @@ public class NMDDataDaoImpl implements NMDDataDao {
             Object objResponse = jaxbMarshaller.unmarshal(file);
             DatasetsType response;
             if (objResponse instanceof JAXBElement) {
-                response = (DatasetsType) ((JAXBElement)objResponse).getValue();
+                response = (DatasetsType) ((JAXBElement) objResponse).getValue();
             } else {
                 response = (DatasetsType) jaxbMarshaller.unmarshal(file);
             }
-            for (int i = 0;i < response.getDataset().size(); i++) {
+            for (int i = 0; i < response.getDataset().size(); i++) {
                 DatasetType datasetType = response.getDataset().get(i);
                 if (datasetType.getDataType() != null && datasetType.getDataType().equalsIgnoreCase(type)) {
                     response.getDataset().remove(i);
@@ -279,10 +281,30 @@ public class NMDDataDaoImpl implements NMDDataDao {
         }
     }
 
+    /**
+     *
+     * @param name
+     * @return
+     */
     public boolean hasData(String name) {
         String predir = configuration.getString("pre.data.dir");
         File file = new File(predir + File.separator + name + File.separator + FILENAME);
         return file.exists();
+    }
+
+    public List<String> listSeries(String... args) {
+        String predir = configuration.getString("pre.data.dir");
+        StringBuilder dir = new StringBuilder(predir);
+        for (String arg : args) {
+            dir.append(File.separator);
+            dir.append(arg);
+        }
+        File file = new File(dir.toString());
+        List<String> names = new ArrayList<String>();
+        for (String name : file.list()) {
+            names.add(name);
+        }
+        return names;
     }
 
 }

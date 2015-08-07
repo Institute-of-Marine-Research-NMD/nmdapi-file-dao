@@ -1,6 +1,7 @@
 package no.imr.nmdapi.dao.file;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * This handles generic marshall and unmarshall objects to the
@@ -36,7 +37,7 @@ public interface NMDDataDao {
     <T> void update(String name, T data, Class<T> clazz);
 
     /**
-     * 
+     *
      * @param <T>
      * @param name
      * @param data
@@ -123,4 +124,14 @@ public interface NMDDataDao {
      * @return
      */
     void deleteDataset(String missiontype, String year, String platform, String delivery, String type);
+
+    /**
+     * Returns a list of files for a specific series. It uses pre.data.dir to
+     * get pre the directory
+     *
+     * @param args  Arguments as directory names.
+     * @return  A list of files.
+     */
+    List<String> listSeries(String... args);
+
 }
