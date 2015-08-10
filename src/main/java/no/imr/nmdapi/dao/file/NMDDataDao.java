@@ -134,4 +134,12 @@ public interface NMDDataDao {
      */
     List<String> listSeries(String... args);
 
+    /**
+     *
+     * @param clazz
+     * @param cruisenr  Cruise number.
+     * @return
+     */
+    Object getByCruiseNr(Class<?> clazz, String cruisenr);
+
 }

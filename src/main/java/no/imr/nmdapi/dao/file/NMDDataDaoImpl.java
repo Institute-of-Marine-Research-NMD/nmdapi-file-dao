@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -20,6 +21,10 @@ import no.imr.nmd.commons.dataset.jaxb.RestrictionsType;
 import no.imr.nmdapi.exceptions.AlreadyExistsException;
 import no.imr.nmdapi.exceptions.NotFoundException;
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.NameFileFilter;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -308,6 +313,30 @@ public class NMDDataDaoImpl implements NMDDataDao {
             }
         }
         return names;
+    }
+
+    /**
+     * Get file suing cruisenr only.
+     *
+     * @param clazz
+     * @param cruisenr
+     * @return
+     */
+    public Object getByCruiseNr(Class<?> clazz, String cruisenr) {
+        String predir = configuration.getString("pre.data.dir");
+        String postdir = configuration.getString("post.data.dir");
+        Iterator<File> dir = FileUtils.iterateFilesAndDirs(new File(predir), new NameFileFilter(cruisenr), TrueFileFilter.INSTANCE);
+        if (dir.hasNext()) {
+            while(dir.hasNext()) {
+                File file = dir.next();
+                if (file.getName().equals(cruisenr)) {
+                    String fileDir = file.getAbsolutePath().concat(File.separator).concat(postdir).concat(File.separator).concat(FILENAME);
+                    return getFile(clazz, new File(fileDir));
+                }
+            }
+        }
+
+        throw new NotFoundException("Cruisenr was not found.");
     }
 
 }
