@@ -45,6 +45,11 @@ public interface NMDDataDao {
      */
     <T> void insert(String name, T data, Class<T> clazz);
 
+    /**
+     *
+     * @param name
+     * @return
+     */
     boolean hasData(String name);
 
      /**
@@ -133,5 +138,21 @@ public interface NMDDataDao {
      * @return  A list of files.
      */
     List<String> listSeries(String... args);
+
+    /**
+     *
+     * @param aClass
+     * @param cruisenr
+     * @return
+     */
+    Object getByCruiseNr(Class<?> aClass, String cruisenr);
+
+    /**
+     *
+     * @param aClass
+     * @param cruisenr
+     * @return
+     */
+    boolean hasDataByCruiseNr(String cruisenr);
 
 }
