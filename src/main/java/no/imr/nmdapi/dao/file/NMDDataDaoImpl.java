@@ -2,10 +2,17 @@ package no.imr.nmdapi.dao.file;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -325,18 +332,45 @@ public class NMDDataDaoImpl implements NMDDataDao {
     public Object getByCruiseNr(Class<?> clazz, String cruisenr) {
         String predir = configuration.getString("pre.data.dir");
         String postdir = configuration.getString("post.data.dir");
-        Iterator<File> dir = FileUtils.iterateFilesAndDirs(new File(predir), new NameFileFilter(cruisenr), TrueFileFilter.INSTANCE);
-        if (dir.hasNext()) {
-            while(dir.hasNext()) {
-                File file = dir.next();
-                if (file.getName().equals(cruisenr)) {
-                    String fileDir = file.getAbsolutePath().concat(File.separator).concat(postdir).concat(File.separator).concat(FILENAME);
-                    return getFile(clazz, new File(fileDir));
-                }
+        Finder finder = new Finder(cruisenr);
+        try {
+            Files.walkFileTree(Paths.get(predir), finder);
+        } catch (IOException ex) {
+            java.util.logging.Logger.getLogger(NMDDataDaoImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (finder.getPath() != null) {
+            File file = new File(finder.getPath().toString().concat(File.separator).concat(postdir).concat(File.separator).concat(FILENAME));
+            return getFile(clazz, file);
+        } else {
+            throw new NotFoundException("Cruisenr was not found.");
+        }
+    }
+
+    public static class Finder
+            extends SimpleFileVisitor<Path> {
+
+        private final String name;
+
+        private Path path;
+
+        public Finder(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+            if (dir.getFileName().toString().equals(name)) {
+                this.path = dir;
+                return FileVisitResult.TERMINATE;
+            } else {
+                return FileVisitResult.CONTINUE;
             }
         }
 
-        throw new NotFoundException("Cruisenr was not found.");
+        public Path getPath() {
+            return path;
+        }
+
     }
 
 }
