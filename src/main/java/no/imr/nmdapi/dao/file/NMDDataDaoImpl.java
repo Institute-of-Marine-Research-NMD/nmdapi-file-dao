@@ -25,6 +25,7 @@ import no.imr.nmd.commons.dataset.jaxb.DatasetsType;
 import no.imr.nmd.commons.dataset.jaxb.QualityEnum;
 import no.imr.nmd.commons.dataset.jaxb.RestrictionsType;
 import no.imr.nmdapi.exceptions.AlreadyExistsException;
+import no.imr.nmdapi.exceptions.ApplicationException;
 import no.imr.nmdapi.exceptions.NotFoundException;
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
@@ -336,12 +337,17 @@ public class NMDDataDaoImpl implements NMDDataDao {
         try {
             Files.walkFileTree(Paths.get(predir), finder);
         } catch (IOException ex) {
-            java.util.logging.Logger.getLogger(NMDDataDaoImpl.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.error("Failed to parse dir tree.", ex);
+            throw new ApplicationException("Failed to parse dir tree.", ex);
         }
         if (finder.getPath() != null) {
             File file = new File(finder.getPath().toString().concat(File.separator).concat(postdir).concat(File.separator).concat(FILENAME));
             LOG.info("get file: " + file.getAbsolutePath());
-            return getFile(clazz, file);
+            if (file.exists()) {
+                return getFile(clazz, file);
+            } else {
+                throw new NotFoundException("Data was not found.");
+            }
         } else {
             throw new NotFoundException("Cruisenr was not found.");
         }
@@ -365,8 +371,6 @@ public class NMDDataDaoImpl implements NMDDataDao {
         }
     }
 
-
-
     public static class Finder
             extends SimpleFileVisitor<Path> {
 
@@ -380,11 +384,20 @@ public class NMDDataDaoImpl implements NMDDataDao {
 
         @Override
         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-            if (dir.getFileName().toString().equals(name)) {
-                this.path = dir;
-                return FileVisitResult.TERMINATE;
+            String regex = "[0-9]{4}";
+            if (dir.getFileName().toString().matches(regex)) {
+                if (name.substring(0, 4).equals(dir.getFileName().toString())) {
+                    return FileVisitResult.CONTINUE;
+                } else {
+                    return FileVisitResult.SKIP_SUBTREE;
+                }
             } else {
-                return FileVisitResult.CONTINUE;
+                if (dir.getFileName().toString().equals(name)) {
+                    this.path = dir;
+                    return FileVisitResult.TERMINATE;
+                } else {
+                    return FileVisitResult.CONTINUE;
+                }
             }
         }
 
