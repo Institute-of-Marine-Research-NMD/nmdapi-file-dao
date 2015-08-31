@@ -8,7 +8,7 @@
     </parent>
     <groupId>no.imr.nmdapi.dao.file</groupId>
     <artifactId>nmdapi-file-dao</artifactId>
-    <version>1.0.11-SNAPSHOT</version>
+    <version>1.0.11</version>
     <packaging>jar</packaging>
     <name>NMDAPI - File DAO</name>
     <distributionManagement>
@@ -21,7 +21,7 @@
         <connection>scm:git:git@github.com:Institute-of-Marine-Research-NMD/nmdapi-file-dao.git</connection>
         <url>scm:git:git@github.com:Institute-of-Marine-Research-NMD/nmdapi-file-dao.git</url>
         <developerConnection>scm:git:git@github.com:Institute-of-Marine-Research-NMD/nmdapi-file-dao.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>nmdapi-file-dao-1.0.11</tag>
     </scm>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
