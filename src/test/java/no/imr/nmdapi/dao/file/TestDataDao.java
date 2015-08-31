@@ -106,7 +106,7 @@ public class TestDataDao {
     public void testInsertTwoDatasetsOfSameType() {
         TestType testData = new TestType();
         testData.setData("test");
-        //nmdDataDao.insert("writeRole", "unrestricted", "imr", "test", "test data1", testData, true, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
+        nmdDataDao.insert("writeRole", "unrestricted", "imr", "test", "test data1", testData, true, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
         assertEquals(1, nmdDataDao.getDatasetsByType("test", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101").getDataset().size());
         nmdDataDao.insert("writeRole", "unrestricted", "imr", "test", "test data2", testData, true, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
         assertEquals(2, nmdDataDao.getDatasetsByType("test", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101").getDataset().size());
