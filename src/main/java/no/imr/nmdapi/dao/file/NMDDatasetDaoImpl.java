@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -214,14 +216,30 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         }
     }
 
-    public DatasetsType getDatasets(String type, String... dirs) {
+    public DatasetsType getDatasetsByType(String type, String... dirs) {
+        File file = getDatasetFile(dirs);
+        DatasetsType datasetsType = unmarshall(DatasetsType.class.getPackage().getName(), file);
+        ListIterator<DatasetType> it = datasetsType.getDataset().listIterator();
+        List<DatasetType> datasetsOfType = new ArrayList<DatasetType>();
+        while (it.hasNext()) {
+            DatasetType datasetType = it.next();
+            if (datasetType.getDataType().equals(type)) {
+                datasetsOfType.add(datasetType);
+            }
+        }
+        DatasetsType result = new DatasetsType();
+        result.getDataset().addAll(datasetsOfType);
+        return result;
+    }
+
+    public DatasetsType getDatasets(String... dirs) {
         File file = getDatasetFile(dirs);
         return unmarshall(DatasetsType.class.getPackage().getName(), file);
     }
 
     public boolean hasWriteAccess(Collection<String> authorities, String type, String datasetName, String... dirs) {
         boolean access = false;
-        DatasetType datasetType = getDataset(type, datasetName, dirs);
+        DatasetType datasetType = getDatasetByName(type, datasetName, dirs);
         if (datasetType.getRestrictions().getWrite().equals("unrestricted")) {
             access = true;
         } else if (authorities.contains(datasetType.getRestrictions().getWrite())) {
@@ -232,7 +250,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
 
     public boolean hasReadAccess(Collection<String> authorities, String type, String datasetName, String... dirs) {
         boolean access = false;
-        DatasetType datasetType = getDataset(type, datasetName, dirs);
+        DatasetType datasetType = getDatasetByName(type, datasetName, dirs);
         if (datasetType.getRestrictions().getRead().equals("unrestricted")) {
             access = true;
         } else if (authorities.contains(datasetType.getRestrictions().getRead())) {
@@ -241,8 +259,8 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         return access;
     }
 
-    private DatasetType getDataset(String type, String datasetName, String... dirs) {
-        DatasetsType datasetsType = getDatasets(type, dirs);
+    private DatasetType getDatasetByName(String type, String datasetName, String... dirs) {
+        DatasetsType datasetsType = getDatasetsByType(type, dirs);
         for (DatasetType datasetType : datasetsType.getDataset()) {
             if (datasetType.getDataType().equals(type) && datasetType.getDatasetName().equals(datasetName)) {
                 return datasetType;

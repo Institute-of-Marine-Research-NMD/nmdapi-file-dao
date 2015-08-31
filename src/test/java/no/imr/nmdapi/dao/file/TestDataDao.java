@@ -106,15 +106,15 @@ public class TestDataDao {
     public void testInsertTwoDatasetsOfSameType() {
         TestType testData = new TestType();
         testData.setData("test");
-        nmdDataDao.insert("writeRole", "unrestricted", "imr", "test", "test data1", testData, true, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
-        assertEquals(1, nmdDataDao.getDatasets("test", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101").getDataset().size());
+        //nmdDataDao.insert("writeRole", "unrestricted", "imr", "test", "test data1", testData, true, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
+        assertEquals(1, nmdDataDao.getDatasetsByType("test", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101").getDataset().size());
         nmdDataDao.insert("writeRole", "unrestricted", "imr", "test", "test data2", testData, true, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
-        assertEquals(2, nmdDataDao.getDatasets("test", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101").getDataset().size());
+        assertEquals(2, nmdDataDao.getDatasetsByType("test", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101").getDataset().size());
         assertNotNull(nmdDataDao.get("test", "test data1", TestType.class.getPackage().getName(), "Forskningsdata", "2015", "G O Sars_LMEL", "2015101"));
         assertNotNull(nmdDataDao.get("test", "test data2", TestType.class.getPackage().getName(), "Forskningsdata", "2015", "G O Sars_LMEL", "2015101"));
-        assertEquals(2, nmdDataDao.getDatasets("test", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101").getDataset().size());
+        assertEquals(2, nmdDataDao.getDatasetsByType("test", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101").getDataset().size());
         nmdDataDao.delete("test", "test data1", true, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
-        assertEquals(1, nmdDataDao.getDatasets("test", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101").getDataset().size());
+        assertEquals(1, nmdDataDao.getDatasetsByType("test", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101").getDataset().size());
         nmdDataDao.delete("test", "test data2", true, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
     }
 

@@ -86,7 +86,15 @@ public interface NMDDatasetDao {
      * @param dirs
      * @return
      */
-    DatasetsType getDatasets(String type, String... dirs);
+    DatasetsType getDatasetsByType(String type, String... dirs);
+
+    /**
+     *  Get all datasets.
+     *
+     * @param dirs
+     * @return
+     */
+    DatasetsType getDatasets(String... dirs);
 
     /**
      *
