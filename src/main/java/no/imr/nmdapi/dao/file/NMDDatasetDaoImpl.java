@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.GregorianCalendar;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import javax.xml.bind.JAXBContext;
@@ -44,7 +43,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
     /**
      * Dataset filename.
      */
-    private static final String DATASET_FILENAME = "datasets.xml";
+    private static final String DATASET_FILENAME = "data.xml";
 
     /**
      * Pre data dir property name.
