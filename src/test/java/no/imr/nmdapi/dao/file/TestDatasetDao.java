@@ -3,7 +3,7 @@ package no.imr.nmdapi.dao.file;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import no.imr.nmdapi.dao.file.TestDataDao.Init;
+import no.imr.nmdapi.dao.file.TestDatasetDao.Init;
 import no.imr.nmdapi.dao.file.config.CommonDaoConfig;
 import no.imr.nmdapi.exceptions.AlreadyExistsException;
 import no.imr.nmdapi.exceptions.NotFoundException;
@@ -27,7 +27,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {CommonDaoConfig.class, Init.class})
-public class TestDataDao {
+public class TestDatasetDao {
 
     @org.springframework.context.annotation.Configuration
     public static class Init {

@@ -2,6 +2,12 @@ package no.imr.nmdapi.dao.file;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -87,7 +93,25 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
 
     public <T> T get(String type, String datasetName, String packageName, String... dirs) {
         File file = getFile(type, datasetName, dirs);
-        return unmarshall(packageName, file);
+        if (file.exists()) {
+            return unmarshall(packageName, file);
+        } else {
+            throw new NotFoundException("Not found: " + file.getAbsolutePath());
+        }
+    }
+
+    public <T> T getByCruisenr(String type, String datasetName, String packageName, String cruisenr) {
+        File file = getFileByCruisenr(type, datasetName, cruisenr);
+        if (file.exists()) {
+            return unmarshall(packageName, file);
+        } else {
+            throw new NotFoundException("Not found: " + file.getAbsolutePath());
+        }
+    }
+
+    public boolean hasDataByCruisenr(String type, String datasetName, String packageName, String cruisenr) {
+        File file = getFileByCruisenr(type, datasetName, cruisenr);
+        return file.exists();
     }
 
     private <T> T unmarshall(String packageName, final File file) {
@@ -266,6 +290,62 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
             }
         }
         return null;
+    }
+
+    private File getFileByCruisenr(String type, String datasetName, String cruisenr) {
+        String predir = configuration.getString("pre.data.dir");
+        Finder finder = new Finder(cruisenr);
+        try {
+            Files.walkFileTree(Paths.get(predir), finder);
+        } catch (IOException ex) {
+            LOG.error("Error finding cruisenr", ex);
+            throw new S2DException("Error finding cruisenr", ex);
+        }
+        if (finder.getPath() != null) {
+            File file = new File(finder.getPath().toString().concat(File.separator).concat(type).concat(File.separator).concat(datasetName).concat(".xml"));
+            LOG.info("get file: " + file.getAbsolutePath());
+            return file;
+        } else {
+            throw new NotFoundException("Cruisenr not found: " + cruisenr);
+        }
+    }
+
+
+
+    public static class Finder
+            extends SimpleFileVisitor<Path> {
+
+        private final String name;
+
+        private Path path;
+
+        public Finder(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+            String regex = "[0-9]{4}";
+            if (dir.getFileName().toString().matches(regex)) {
+                if (name.substring(0, 4).equals(dir.getFileName().toString())) {
+                    return FileVisitResult.CONTINUE;
+                } else {
+                    return FileVisitResult.SKIP_SUBTREE;
+                }
+            } else {
+                if (dir.getFileName().toString().equals(name)) {
+                    this.path = dir;
+                    return FileVisitResult.TERMINATE;
+                } else {
+                    return FileVisitResult.CONTINUE;
+                }
+            }
+        }
+
+        public Path getPath() {
+            return path;
+        }
+
     }
 
 }

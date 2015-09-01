@@ -115,4 +115,25 @@ public interface NMDDatasetDao {
      * @return
      */
     boolean hasReadAccess(Collection<String> authorities, String type, String datasetName, String... dirs);
+
+    /**
+     *
+     * @param <T>
+     * @param type
+     * @param datasetName
+     * @param packageName
+     * @param cruisenr
+     * @return
+     */
+    <T> T getByCruisenr(String type, String datasetName, String packageName, String cruisenr);
+
+    /**
+     * 
+     * @param type
+     * @param datasetName
+     * @param packageName
+     * @param cruisenr
+     * @return
+     */
+    boolean hasDataByCruisenr(String type, String datasetName, String packageName, String cruisenr);
 }
