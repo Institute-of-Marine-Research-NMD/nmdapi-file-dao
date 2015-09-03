@@ -3,7 +3,6 @@ package no.imr.nmdapi.dao.file;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -228,9 +227,13 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
     public boolean hasWriteAccess(Collection<String> authorities, String type, String datasetName) {
         boolean access = false;
         DatasetType datasetType = getDatasetByName(type, datasetName);
-        if (datasetType.getRestrictions().getWrite().equals("unrestricted")) {
-            access = true;
-        } else if (authorities.contains(datasetType.getRestrictions().getWrite())) {
+        if (datasetType.getRestrictions() != null && datasetType.getRestrictions().getWrite() != null) {
+            if (datasetType.getRestrictions().getWrite().equals("unrestricted")) {
+                access = true;
+            } else if (authorities.contains(datasetType.getRestrictions().getWrite())) {
+                access = true;
+            }
+        } else {
             access = true;
         }
         return access;
@@ -239,9 +242,13 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
     public boolean hasReadAccess(Collection<String> authorities, String type, String datasetName) {
         boolean access = false;
         DatasetType datasetType = getDatasetByName(type, datasetName);
-        if (datasetType.getRestrictions().getRead().equals("unrestricted")) {
-            access = true;
-        } else if (authorities.contains(datasetType.getRestrictions().getRead())) {
+        if (datasetType.getRestrictions() != null && datasetType.getRestrictions().getRead() != null) {
+            if (datasetType.getRestrictions().getRead().equals("unrestricted")) {
+                access = true;
+            } else if (authorities.contains(datasetType.getRestrictions().getRead())) {
+                access = true;
+            }
+        } else {
             access = true;
         }
         return access;
