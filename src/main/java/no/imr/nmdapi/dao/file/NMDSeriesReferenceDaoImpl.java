@@ -113,7 +113,11 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
     public List<String> list() {
         List<String> result = new ArrayList<String>();
         File file = getDirectory();
-        result.addAll(Arrays.asList(file.list()));
+        for (File f : file.listFiles()) {
+            if (f.isDirectory()) {
+                result.add(f.getName());
+            }
+        }
         return result;
     }
 
