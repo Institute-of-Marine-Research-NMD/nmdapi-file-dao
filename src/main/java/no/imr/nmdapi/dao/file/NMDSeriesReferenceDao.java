@@ -17,10 +17,9 @@ public interface NMDSeriesReferenceDao {
      *
      * @param <T>
      * @param datasetName
-     * @param packageName
      * @return
      */
-    <T> T get(String datasetName, String packageName);
+    <T> T get(String datasetName);
 
     /**
      * Delete a single dataset.

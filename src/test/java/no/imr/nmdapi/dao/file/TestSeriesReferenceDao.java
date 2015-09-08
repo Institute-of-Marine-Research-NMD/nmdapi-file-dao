@@ -35,6 +35,7 @@ public class TestSeriesReferenceDao {
         public Configuration configuration() {
             Configuration cfg = new PropertiesConfiguration();
             cfg.addProperty("pre.data.dir", System.getProperty("java.io.tmpdir"));
+            cfg.addProperty("app.packages", "no.imr.nmdapi.dao.file:no.imr.nmd.commons.dataset.jaxb");
             return cfg;
         }
     }
@@ -53,7 +54,7 @@ public class TestSeriesReferenceDao {
             seriesReferenceDao.delete("test", "test data", true);
         }
         seriesReferenceDao.insert("writeRole", "unrestricted", "imr", "test", "test data", testData, true);
-        TestType testRes = seriesReferenceDao.get("test data", "no.imr.nmdapi.dao.file");
+        TestType testRes = seriesReferenceDao.get("test data");
         assertEquals(testData.getData(), testRes.getData());
     }
 

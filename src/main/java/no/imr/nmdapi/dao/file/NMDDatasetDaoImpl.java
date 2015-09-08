@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import javax.xml.bind.JAXBContext;
@@ -19,6 +20,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -91,48 +93,54 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         return new File(builder.toString());
     }
 
-    public <T> T get(String type, String datasetName, String packageName, String... dirs) {
+    public <T> T get(String type, String datasetName, String... dirs) {
         File file = getFile(type, datasetName, dirs);
         if (file.exists()) {
-            return unmarshall(packageName, file);
+            return unmarshall(file);
         } else {
             throw new NotFoundException("Not found: " + file.getAbsolutePath());
         }
     }
 
-    public <T> T getByCruisenr(String type, String datasetName, String packageName, String cruisenr) {
+    public <T> T getByCruisenr(String type, String datasetName, String cruisenr) {
         File file = getFileByCruisenr(type, datasetName, cruisenr);
         if (file.exists()) {
-            return unmarshall(packageName, file);
+            return unmarshall(file);
         } else {
             throw new NotFoundException("Not found: " + file.getAbsolutePath());
         }
     }
 
-    public boolean hasDataByCruisenr(String type, String datasetName, String packageName, String cruisenr) {
+    public boolean hasDataByCruisenr(String type, String datasetName, String cruisenr) {
         File file = getFileByCruisenr(type, datasetName, cruisenr);
         return file.exists();
     }
 
-    private <T> T unmarshall(String packageName, final File file) {
-        try {
-            JAXBContext context = JAXBContext.newInstance(packageName);
-            Unmarshaller jaxbMarshaller = context.createUnmarshaller();
-            Object response = jaxbMarshaller.unmarshal(file);
-            if (response instanceof JAXBElement) {
-                return (T) ((JAXBElement) response).getValue();
-            } else {
-                return (T) response;
+    private <T> T unmarshall(final File file) {
+        String packages = configuration.getString("app.packages");
+        if (file.exists()) {
+            try {
+                JAXBContext context = JAXBContext.newInstance(packages);
+                Unmarshaller jaxbMarshaller = context.createUnmarshaller();
+                Object response = jaxbMarshaller.unmarshal(file);
+                if (response instanceof JAXBElement) {
+                    return (T) ((JAXBElement) response).getValue();
+                } else {
+                    return (T) response;
+                }
+            } catch (JAXBException ex) {
+                LOG.error("Error unmarshalling. ", ex);
+                throw new S2DException("Could not get data.");
             }
-        } catch (JAXBException ex) {
-            LOG.error("Error unmarshalling. ", ex);
-            throw new S2DException("Could not get data.");
+        } else {
+            return ((T)new DatasetsType());
         }
     }
 
-    private <T> void marshall(final String packageName, final Object data, final File file) {
+    private <T> void marshall(final Object data, final File file) {
+        String packages = configuration.getString("app.packages");
         try {
-            JAXBContext context = JAXBContext.newInstance(packageName);
+            JAXBContext context = JAXBContext.newInstance(packages);
             Marshaller jaxbMarshaller = context.createMarshaller();
             file.createNewFile();
             jaxbMarshaller.marshal(data, file);
@@ -162,7 +170,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
 
     public <T> void update(String type, String datasetName, T data, String... names) {
         File file = getFile(type, datasetName, names);
-        marshall(data.getClass().getPackage().getName(), data, file);
+        marshall(data, file);
     }
 
     public <T> void insert(String writeRole, String readRole, String owner, String type, String datasetName, T data, boolean addDataset, String... dirs) {
@@ -171,7 +179,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
             throw new AlreadyExistsException(file.getName().concat(" already exist."));
         }
         file.getParentFile().mkdirs();
-        marshall(data.getClass().getPackage().getName(), data, file);
+        marshall(data, file);
         addDataset(writeRole, readRole, owner, type, datasetName, dirs);
     }
 
@@ -212,18 +220,18 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         File file = getDatasetFile(dirs);
         DatasetsType datasetsType;
         if (file.exists()) {
-            datasetsType = unmarshall(DatasetsType.class.getPackage().getName(), file);
+            datasetsType = unmarshall(file);
             datasetsType.getDataset().add(datasetType);
         } else {
             datasetsType = new DatasetsType();
             datasetsType.getDataset().add(datasetType);
         }
-        marshall(DatasetsType.class.getPackage().getName(), datasetsType, file);
+        marshall(datasetsType, file);
     }
 
     private void removeDataset(String type, String datasetName, String... dirs) {
         File file = getDatasetFile(dirs);
-        DatasetsType datasets = unmarshall(DatasetsType.class.getPackage().getName(), file);
+        DatasetsType datasets = unmarshall(file);
         for (int i = 0; i < datasets.getDataset().size(); i++) {
             DatasetType datasetType = datasets.getDataset().get(i);
             if (datasetType.getDataType().equalsIgnoreCase(type) && datasetType.getDatasetName().equalsIgnoreCase(datasetName)) {
@@ -232,7 +240,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         }
         if (datasets.getDataset().size() > 0) {
             // Marshall updated dataset file.
-            marshall(datasets.getClass().getPackage().getName(), datasets, file);
+            marshall(datasets, file);
         } else {
             // remove fe if no datasets exist.
             file.delete();
@@ -241,7 +249,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
 
     public DatasetsType getDatasetsByType(String type, String... dirs) {
         File file = getDatasetFile(dirs);
-        DatasetsType datasetsType = unmarshall(DatasetsType.class.getPackage().getName(), file);
+        DatasetsType datasetsType = unmarshall(file);
         ListIterator<DatasetType> it = datasetsType.getDataset().listIterator();
         List<DatasetType> datasetsOfType = new ArrayList<DatasetType>();
         while (it.hasNext()) {
@@ -257,7 +265,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
 
     public DatasetsType getDatasets(String... dirs) {
         File file = getDatasetFile(dirs);
-        return unmarshall(DatasetsType.class.getPackage().getName(), file);
+        return unmarshall(file);
     }
 
     public boolean hasWriteAccess(Collection<String> authorities, String type, String datasetName, String... dirs) {
@@ -278,7 +286,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
     public boolean hasReadAccess(Collection<String> authorities, String type, String datasetName, String... dirs) {
         boolean access = false;
         DatasetType datasetType = getDatasetByName(type, datasetName, dirs);
-        if (datasetType.getRestrictions() != null && datasetType.getRestrictions().getRead()!= null) {
+        if (datasetType != null && datasetType.getRestrictions() != null && datasetType.getRestrictions().getRead() != null) {
             if (datasetType.getRestrictions().getRead().equals("unrestricted")) {
                 access = true;
             } else if (authorities.contains(datasetType.getRestrictions().getRead())) {
@@ -318,7 +326,28 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         }
     }
 
-
+    public void updateDataset(DatasetType data, String... dirs) {
+        File file = getDatasetFile(dirs);
+        if (file.exists()) {
+            DatasetsType datasets = unmarshall(file);
+            Iterator<DatasetType> iterator = datasets.getDataset().iterator();
+            boolean removed = false;
+            while (iterator.hasNext()) {
+                DatasetType dataset = iterator.next();
+                if (dataset.getDataType().equalsIgnoreCase(data.getDataType()) && dataset.getDatasetName().equalsIgnoreCase(data.getDatasetName()) && dataset.getId().equalsIgnoreCase(data.getId())) {
+                    removed = true;
+                    iterator.remove();
+                }
+            }
+            if (removed) {
+                datasets.getDataset().add(data);
+            } else {
+                throw new NotFoundException("Dataset was not found.");
+            }
+        } else {
+            throw new NotFoundException("Dataset not found");
+        }
+    }
 
     public static class Finder
             extends SimpleFileVisitor<Path> {

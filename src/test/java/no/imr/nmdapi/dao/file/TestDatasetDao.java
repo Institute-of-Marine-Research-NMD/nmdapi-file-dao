@@ -31,9 +31,11 @@ public class TestDatasetDao {
 
     @org.springframework.context.annotation.Configuration
     public static class Init {
+
         @Bean
         public Configuration configuration() {
             Configuration cfg = new PropertiesConfiguration();
+            cfg.addProperty("app.packages", "no.imr.nmdapi.dao.file:no.imr.nmd.commons.dataset.jaxb");
             cfg.addProperty("pre.data.dir", System.getProperty("java.io.tmpdir"));
             return cfg;
         }
@@ -50,39 +52,15 @@ public class TestDatasetDao {
         TestType testData = new TestType();
         testData.setData("test");
         nmdDataDao.insert("writeRole", "unrestricted", "imr", "test", "test data", testData, true, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
-        TestType testRes = nmdDataDao.get("test", "test data", "no.imr.nmdapi.dao.file", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
+        TestType testRes = nmdDataDao.get("test", "test data", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
         assertEquals(testData.getData(), testRes.getData());
-    }
-
-    /**
-     * Test series data.
-     */
-    @Test
-    public void testInsertUpdateDeleteSeries() {
-        TestType testData = new TestType();
-        testData.setData("test");
-        nmdDataDao.insert("writeRole", "unrestricted", "imr", "Cruiseseries", "test series", testData, true, "Series");
-        assertNotNull(nmdDataDao.get("Cruiseseries", "test series", "no.imr.nmdapi.dao.file", "Series"));
-        nmdDataDao.delete("Cruiseseries", "test series", true, "Series");
-    }
-
-    /**
-     * Test series data.
-     */
-    @Test
-    public void testInsertUpdateDeleteReferences() {
-        TestType testData = new TestType();
-        testData.setData("test");
-        nmdDataDao.insert("writeRole", "unrestricted", "imr", "data", "test series", testData, true, "Reference");
-        assertNotNull(nmdDataDao.get("data", "test series", "no.imr.nmdapi.dao.file", "Reference"));
-        nmdDataDao.delete("data", "test series", true, "Reference");
     }
 
     @After
     public void delete() {
         try {
             nmdDataDao.delete("test", "test data", true, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
-        } catch(NotFoundException e) {
+        } catch (NotFoundException e) {
 
         }
     }
@@ -90,7 +68,7 @@ public class TestDatasetDao {
     /**
      *
      */
-    @Test(expected=AlreadyExistsException.class)
+    @Test(expected = AlreadyExistsException.class)
     public void testDoubleInsert() {
         TestType testData = new TestType();
         testData.setData("test");
@@ -110,15 +88,15 @@ public class TestDatasetDao {
         assertEquals(1, nmdDataDao.getDatasetsByType("test", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101").getDataset().size());
         nmdDataDao.insert("writeRole", "unrestricted", "imr", "test", "test data2", testData, true, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
         assertEquals(2, nmdDataDao.getDatasetsByType("test", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101").getDataset().size());
-        assertNotNull(nmdDataDao.get("test", "test data1", TestType.class.getPackage().getName(), "Forskningsdata", "2015", "G O Sars_LMEL", "2015101"));
-        assertNotNull(nmdDataDao.get("test", "test data2", TestType.class.getPackage().getName(), "Forskningsdata", "2015", "G O Sars_LMEL", "2015101"));
+        assertNotNull(nmdDataDao.get("test", "test data1", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101"));
+        assertNotNull(nmdDataDao.get("test", "test data2", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101"));
         assertEquals(2, nmdDataDao.getDatasetsByType("test", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101").getDataset().size());
         nmdDataDao.delete("test", "test data1", true, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
         assertEquals(1, nmdDataDao.getDatasetsByType("test", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101").getDataset().size());
         nmdDataDao.delete("test", "test data2", true, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
     }
 
-     /**
+    /**
      * Test restrictions.
      */
     @Test

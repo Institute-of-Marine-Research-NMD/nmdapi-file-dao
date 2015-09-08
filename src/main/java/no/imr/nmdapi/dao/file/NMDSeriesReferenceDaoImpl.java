@@ -61,10 +61,10 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
         return new File(builder.toString());
     }
 
-    public <T> T get(String datasetName, String packageName) {
+    public <T> T get(String datasetName) {
         File file = getFile(datasetName);
         if (file.exists()) {
-            return unmarshall(packageName, file);
+            return unmarshall(file);
         } else {
             throw new NotFoundException("Not found: " + file.getAbsolutePath());
         }
@@ -88,7 +88,7 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
     public <T> void update(String datasetName, T data) {
         File file = getFile(datasetName);
         if (file.exists()) {
-            marshall(data.getClass().getPackage().getName(), data, file);
+            marshall(data, file);
         } else {
             throw new NotFoundException("Not found: " + file.getAbsolutePath());
         }
@@ -100,7 +100,7 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
             throw new AlreadyExistsException(file.getName().concat(" already exist."));
         }
         file.getParentFile().mkdirs();
-        marshall(data.getClass().getPackage().getName(), data, file);
+        marshall(data, file);
         addDataset(writeRole, readRole, owner, type, datasetName);
     }
 
@@ -122,12 +122,13 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
 
     public DatasetsType getDatasets() {
         File file = getDatasetFile();
-        return unmarshall(DatasetsType.class.getPackage().getName(), file);
+        return unmarshall(file);
     }
 
-    private <T> T unmarshall(String packageName, final File file) {
+    private <T> T unmarshall(final File file) {
+        String packages = configuration.getString("app.packages");
         try {
-            JAXBContext context = JAXBContext.newInstance(packageName);
+            JAXBContext context = JAXBContext.newInstance(packages);
             Unmarshaller jaxbMarshaller = context.createUnmarshaller();
             Object response = jaxbMarshaller.unmarshal(file);
             if (response instanceof JAXBElement) {
@@ -141,9 +142,10 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
         }
     }
 
-    private <T> void marshall(final String packageName, final Object data, final File file) {
+    private <T> void marshall(final Object data, final File file) {
+        String packages = configuration.getString("app.packages");
         try {
-            JAXBContext context = JAXBContext.newInstance(packageName);
+            JAXBContext context = JAXBContext.newInstance(packages);
             Marshaller jaxbMarshaller = context.createMarshaller();
             file.createNewFile();
             jaxbMarshaller.marshal(data, file);
@@ -158,7 +160,7 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
 
     private void removeDataset(String type, String datasetName) {
         File file = getDatasetFile();
-        DatasetsType datasets = unmarshall(DatasetsType.class.getPackage().getName(), file);
+        DatasetsType datasets = unmarshall(file);
         for (int i = 0; i < datasets.getDataset().size(); i++) {
             DatasetType datasetType = datasets.getDataset().get(i);
             if (datasetType.getDataType().equalsIgnoreCase(type) && datasetType.getDatasetName().equalsIgnoreCase(datasetName)) {
@@ -167,7 +169,7 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
         }
         if (datasets.getDataset().size() > 0) {
             // Marshall updated dataset file.
-            marshall(datasets.getClass().getPackage().getName(), datasets, file);
+            marshall(datasets, file);
         } else {
             // remove fe if no datasets exist.
             file.delete();
@@ -199,13 +201,13 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
         File file = getDatasetFile();
         DatasetsType datasetsType;
         if (file.exists()) {
-            datasetsType = unmarshall(DatasetsType.class.getPackage().getName(), file);
+            datasetsType = unmarshall(file);
             datasetsType.getDataset().add(datasetType);
         } else {
             datasetsType = new DatasetsType();
             datasetsType.getDataset().add(datasetType);
         }
-        marshall(DatasetsType.class.getPackage().getName(), datasetsType, file);
+        marshall(datasetsType, file);
     }
 
     private File getDirectory(String... dirs) {

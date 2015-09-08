@@ -2,6 +2,7 @@ package no.imr.nmdapi.dao.file;
 
 import java.util.Collection;
 import java.util.List;
+import no.imr.nmd.commons.dataset.jaxb.DatasetType;
 import no.imr.nmd.commons.dataset.jaxb.DatasetsType;
 
 /**
@@ -18,11 +19,10 @@ public interface NMDDatasetDao {
      * @param <T>
      * @param type
      * @param datasetName
-     * @param packageName
      * @param dirs
      * @return
      */
-    <T> T get(String type, String datasetName, String packageName, String... dirs);
+    <T> T get(String type, String datasetName, String... dirs);
 
     /**
      * Delete a single dataset.
@@ -118,22 +118,28 @@ public interface NMDDatasetDao {
 
     /**
      *
+     * @param data
+     * @param dirs
+     */
+    void updateDataset(DatasetType data, String... dirs);
+
+    /**
+     *
      * @param <T>
      * @param type
      * @param datasetName
-     * @param packageName
      * @param cruisenr
      * @return
      */
-    <T> T getByCruisenr(String type, String datasetName, String packageName, String cruisenr);
+    <T> T getByCruisenr(String type, String datasetName, String cruisenr);
 
     /**
-     * 
+     *
      * @param type
      * @param datasetName
-     * @param packageName
      * @param cruisenr
      * @return
      */
-    boolean hasDataByCruisenr(String type, String datasetName, String packageName, String cruisenr);
+    boolean hasDataByCruisenr(String type, String datasetName, String cruisenr);
+
 }
