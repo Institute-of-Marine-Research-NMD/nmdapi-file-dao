@@ -333,7 +333,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
             boolean removed = false;
             while (iterator.hasNext()) {
                 DatasetType dataset = iterator.next();
-                if (dataset.getDataType().equalsIgnoreCase(data.getDataType()) && dataset.getDatasetName().equalsIgnoreCase(data.getDatasetName()) && dataset.getId().equalsIgnoreCase(data.getId())) {
+                if (dataset.getId().equalsIgnoreCase(data.getId())) {
                     removed = true;
                     iterator.remove();
                 }
