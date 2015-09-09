@@ -20,9 +20,15 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import no.imr.nmd.commons.dataset.jaxb.DatasetType;
 import no.imr.nmd.commons.dataset.jaxb.DatasetsType;
 import no.imr.nmd.commons.dataset.jaxb.QualityEnum;
@@ -98,6 +104,18 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
             return unmarshall(file);
         } else {
             throw new NotFoundException("Not found: " + file.getAbsolutePath());
+        }
+    }
+
+    public String getRootNamespace(String type, String datasetName, String... dirs) {
+        File file = getFile(type, datasetName, dirs);
+        if (file.exists()) {
+            Object o = unmarshall(file);
+            Package packag = Package.getPackage(o.getClass().getPackage().getName());
+            XmlSchema schemaDef = packag.getAnnotation(javax.xml.bind.annotation.XmlSchema.class);
+            return schemaDef.namespace();
+        } else {
+            throw new NotFoundException("Data not found.");
         }
     }
 
@@ -297,7 +315,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         return access;
     }
 
-    private DatasetType getDatasetByName(String type, String datasetName, String... dirs) {
+    public DatasetType getDatasetByName(String type, String datasetName, String... dirs) {
         DatasetsType datasetsType = getDatasetsByType(type, dirs);
         for (DatasetType datasetType : datasetsType.getDataset()) {
             if (datasetType.getDataType().equalsIgnoreCase(type) && datasetType.getDatasetName() != null && datasetType.getDatasetName().equalsIgnoreCase(datasetName)) {
@@ -333,13 +351,14 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
             boolean removed = false;
             while (iterator.hasNext()) {
                 DatasetType dataset = iterator.next();
-                if (dataset.getId().equalsIgnoreCase(data.getId())) {
+                if (dataset.getId().equalsIgnoreCase(data.getId()) && dataset.getDataType().equalsIgnoreCase(data.getDataType())) {
                     removed = true;
                     iterator.remove();
                 }
             }
             if (removed) {
                 datasets.getDataset().add(data);
+                marshall(datasets, file);
             } else {
                 throw new NotFoundException("Dataset was not found.");
             }

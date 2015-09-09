@@ -2,6 +2,7 @@ package no.imr.nmdapi.dao.file;
 
 import java.util.Collection;
 import java.util.List;
+import javax.xml.xpath.XPathExpressionException;
 import no.imr.nmd.commons.dataset.jaxb.DatasetType;
 import no.imr.nmd.commons.dataset.jaxb.DatasetsType;
 
@@ -83,10 +84,21 @@ public interface NMDDatasetDao {
     /**
      *  Get all datasets.
      *
+     * @param type
      * @param dirs
      * @return
      */
     DatasetsType getDatasetsByType(String type, String... dirs);
+
+    /**
+     *
+     * @param type
+     * @param datasetName
+     * @param dirs
+     * @return
+     */
+    DatasetType getDatasetByName(String type, String datasetName, String... dirs);
+
 
     /**
      *  Get all datasets.
@@ -141,5 +153,15 @@ public interface NMDDatasetDao {
      * @return
      */
     boolean hasDataByCruisenr(String type, String datasetName, String cruisenr);
+
+    /**
+     * 
+     * @param type
+     * @param datasetName
+     * @param dirs
+     * @return
+     */
+    String getRootNamespace(String type, String datasetName, String... dirs);
+
 
 }
