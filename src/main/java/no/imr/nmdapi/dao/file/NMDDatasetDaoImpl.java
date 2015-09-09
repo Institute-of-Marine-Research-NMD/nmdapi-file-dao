@@ -20,7 +20,6 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -254,7 +253,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         List<DatasetType> datasetsOfType = new ArrayList<DatasetType>();
         while (it.hasNext()) {
             DatasetType datasetType = it.next();
-            if (datasetType.getDataType().equals(type)) {
+            if (datasetType.getDataType().equalsIgnoreCase(type)) {
                 datasetsOfType.add(datasetType);
             }
         }
@@ -301,7 +300,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
     private DatasetType getDatasetByName(String type, String datasetName, String... dirs) {
         DatasetsType datasetsType = getDatasetsByType(type, dirs);
         for (DatasetType datasetType : datasetsType.getDataset()) {
-            if (datasetType.getDataType().equals(type) && datasetType.getDatasetName().equals(datasetName)) {
+            if (datasetType.getDataType().equalsIgnoreCase(type) && datasetType.getDatasetName() != null && datasetType.getDatasetName().equalsIgnoreCase(datasetName)) {
                 return datasetType;
             }
         }
