@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -264,6 +265,30 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
             }
         }
         return null;
+    }
+
+    public void updateDataset(final DatasetType dataset) {
+        File file = getDatasetFile();
+        if (file.exists()) {
+            DatasetsType datasets = unmarshall(file);
+            Iterator<DatasetType> datasetsIterator = datasets.getDataset().iterator();
+            boolean removed = false;
+            while (datasetsIterator.hasNext()) {
+                DatasetType datasetType = datasetsIterator.next();
+                if (datasetType.getId().equals(dataset.getId())) {
+                    datasetsIterator.remove();
+                    removed = true;
+                }
+            }
+            if (removed) {
+                datasets.getDataset().add(dataset);
+                marshall(dataset, file);
+            } else {
+                throw new NotFoundException("Did not find dataset");
+            }
+        } else {
+            throw new NotFoundException("Dataset file not found.");
+        }
     }
 
 }

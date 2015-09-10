@@ -2,6 +2,7 @@ package no.imr.nmdapi.dao.file;
 
 import java.util.Collection;
 import java.util.List;
+import no.imr.nmd.commons.dataset.jaxb.DatasetType;
 import no.imr.nmd.commons.dataset.jaxb.DatasetsType;
 
 /**
@@ -95,5 +96,11 @@ public interface NMDSeriesReferenceDao {
      */
     boolean hasReadAccess(Collection<String> authorities, String type, String datasetName);
 
+    /**
+     * Update dataset information.
+     *
+     * @param dataset   information.
+     */
+    void updateDataset(final DatasetType dataset);
 
 }

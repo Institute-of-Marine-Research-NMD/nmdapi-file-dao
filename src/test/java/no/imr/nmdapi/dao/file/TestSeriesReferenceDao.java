@@ -1,19 +1,10 @@
 package no.imr.nmdapi.dao.file;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import no.imr.nmdapi.dao.file.TestSeriesReferenceDao.Init;
 import no.imr.nmdapi.dao.file.config.CommonDaoConfig;
-import no.imr.nmdapi.exceptions.AlreadyExistsException;
-import no.imr.nmdapi.exceptions.NotFoundException;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
-import org.junit.After;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
