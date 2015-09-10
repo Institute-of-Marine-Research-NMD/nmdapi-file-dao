@@ -103,4 +103,24 @@ public interface NMDSeriesReferenceDao {
      */
     void updateDataset(final DatasetType dataset);
 
+    /**
+     *
+     * @param datasetName
+     * @return
+     */
+    long getLastModified(String datasetName);
+
+    /**
+     *
+     * @param datasetName
+     * @return
+     */
+    long getChecksum(String datasetName);
+    /**
+     *
+     * @param datasetName
+     * @return
+     */
+    String getRootNamespace(String datasetName);
+
 }

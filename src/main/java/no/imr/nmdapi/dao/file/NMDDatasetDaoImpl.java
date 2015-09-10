@@ -24,11 +24,6 @@ import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 import no.imr.nmd.commons.dataset.jaxb.DatasetType;
 import no.imr.nmd.commons.dataset.jaxb.DatasetsType;
 import no.imr.nmd.commons.dataset.jaxb.QualityEnum;
@@ -364,6 +359,30 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
             }
         } else {
             throw new NotFoundException("Dataset not found");
+        }
+    }
+
+    @Override
+    public long getLastModified(String type, String datasetName, String... dirs) {
+        File file = getFile(type, datasetName, dirs);
+        if (file.exists()) {
+            return file.lastModified();
+        } else {
+            throw new NotFoundException("File was not found.");
+        }
+    }
+
+    @Override
+    public long getChecksum(String type, String datasetName, String... dirs) {
+        File file = getFile(type, datasetName, dirs);
+        if (file.exists()) {
+            try {
+                return FileUtils.checksumCRC32(file);
+            } catch (IOException ex) {
+                throw new S2DException("Application error occured when generating checksum.");
+            }
+        } else {
+            throw new NotFoundException("File was not found.");
         }
     }
 

@@ -12,6 +12,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -245,10 +246,14 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
     public boolean hasReadAccess(Collection<String> authorities, String type, String datasetName) {
         boolean access = false;
         DatasetType datasetType = getDatasetByName(type, datasetName);
-        if (datasetType.getRestrictions() != null && datasetType.getRestrictions().getRead() != null) {
-            if (datasetType.getRestrictions().getRead().equals("unrestricted")) {
-                access = true;
-            } else if (authorities.contains(datasetType.getRestrictions().getRead())) {
+        if (datasetType != null) {
+            if (datasetType.getRestrictions() != null && datasetType.getRestrictions().getRead() != null) {
+                if (datasetType.getRestrictions().getRead().equals("unrestricted")) {
+                    access = true;
+                } else if (authorities.contains(datasetType.getRestrictions().getRead())) {
+                    access = true;
+                }
+            } else {
                 access = true;
             }
         } else {
@@ -291,4 +296,52 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
         }
     }
 
+    /**
+     * 
+     * @param datasetName
+     * @return
+     */
+    public long getLastModified(String datasetName) {
+        File file = getFile(datasetName);
+        if (file.exists()) {
+            return file.lastModified();
+        } else {
+            throw new NotFoundException("File was not found.");
+        }
+    }
+
+    /**
+     *
+     * @param datasetName
+     * @return
+     */
+    public long getChecksum(String datasetName) {
+        File file = getFile(datasetName);
+        if (file.exists()) {
+            try {
+                return FileUtils.checksumCRC32(file);
+            } catch (IOException ex) {
+                throw new S2DException("Application error occured when generating checksum.");
+            }
+        } else {
+            throw new NotFoundException("File was not found.");
+        }
+    }
+
+    /**
+     *
+     * @param datasetName
+     * @return
+     */
+    public String getRootNamespace(String datasetName) {
+        File file = getFile(datasetName);
+        if (file.exists()) {
+            Object o = unmarshall(file);
+            Package packag = Package.getPackage(o.getClass().getPackage().getName());
+            XmlSchema schemaDef = packag.getAnnotation(javax.xml.bind.annotation.XmlSchema.class);
+            return schemaDef.namespace();
+        } else {
+            throw new NotFoundException("Data not found.");
+        }
+    }
 }
