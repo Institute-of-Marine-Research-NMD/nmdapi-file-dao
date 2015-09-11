@@ -209,7 +209,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
 
     private void addDataset(String writeRole, String readRole, String owner, String type, String datasetName, String... dirs) {
         DatasetType datasetType = new DatasetType();
-        String id = "no:imr:".concat(type.toLowerCase()).concat(":").concat(type.toLowerCase()).concat(java.util.UUID.randomUUID().toString());
+        String id = "no:imr:".concat(type.toLowerCase()).concat(":").concat(java.util.UUID.randomUUID().toString());
         datasetType.setId(id);
         XMLGregorianCalendar cal;
         try {
