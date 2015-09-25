@@ -59,7 +59,7 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
         StringBuilder builder = new StringBuilder();
         builder.append(configuration.getString(PRE_DATA_DIR)).append(File.separator);
         builder.append(datasetName).append(File.separator);
-        builder.append(datasetName.concat(".xml"));
+        builder.append(DATASET_FILENAME.concat(".xml"));
         return new File(builder.toString());
     }
 
