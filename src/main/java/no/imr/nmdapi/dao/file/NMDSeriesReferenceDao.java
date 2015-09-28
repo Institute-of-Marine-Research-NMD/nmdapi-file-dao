@@ -2,6 +2,7 @@ package no.imr.nmdapi.dao.file;
 
 import java.util.Collection;
 import java.util.List;
+import no.imr.nmd.commons.dataset.jaxb.DataTypeEnum;
 import no.imr.nmd.commons.dataset.jaxb.DatasetType;
 import no.imr.nmd.commons.dataset.jaxb.DatasetsType;
 
@@ -30,7 +31,7 @@ public interface NMDSeriesReferenceDao {
      * @param datasetName
      * @param removeDataset
      */
-    <T> void delete(String type, String datasetName, boolean removeDataset);
+    <T> void delete(DataTypeEnum type, String datasetName, boolean removeDataset);
 
     /**
      * Update the dataset for a single dataset.
@@ -53,7 +54,7 @@ public interface NMDSeriesReferenceDao {
      * @param addDataset
      * @param data
      */
-    <T> void insert(String writeRole, String readRole, String owner, String type, String datasetName, T data, boolean addDataset);
+    <T> void insert(String writeRole, String readRole, String owner, DataTypeEnum type, String datasetName, T data, boolean addDataset);
 
     /**
      * Does the data exist.
@@ -85,7 +86,7 @@ public interface NMDSeriesReferenceDao {
      * @param datasetName
      * @return
      */
-    boolean hasWriteAccess(Collection<String> authorities, String type, String datasetName);
+    boolean hasWriteAccess(Collection<String> authorities, DataTypeEnum type, String datasetName);
 
     /**
      *
@@ -94,7 +95,7 @@ public interface NMDSeriesReferenceDao {
      * @param datasetName
      * @return
      */
-    boolean hasReadAccess(Collection<String> authorities, String type, String datasetName);
+    boolean hasReadAccess(Collection<String> authorities, DataTypeEnum type, String datasetName);
 
     /**
      * Update dataset information.

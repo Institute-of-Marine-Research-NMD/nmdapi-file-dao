@@ -2,6 +2,7 @@ package no.imr.nmdapi.dao.file;
 
 import java.util.Collection;
 import java.util.List;
+import no.imr.nmd.commons.dataset.jaxb.DataTypeEnum;
 import no.imr.nmd.commons.dataset.jaxb.DatasetType;
 import no.imr.nmd.commons.dataset.jaxb.DatasetsType;
 
@@ -22,7 +23,7 @@ public interface NMDDatasetDao {
      * @param dirs
      * @return
      */
-    <T> T get(String type, String datasetName, String... dirs);
+    <T> T get(DataTypeEnum type, String datasetName, String... dirs);
 
     /**
      * Delete a single dataset.
@@ -33,7 +34,7 @@ public interface NMDDatasetDao {
      * @param removeDataset
      * @param dirs
      */
-    <T> void delete(String type, String datasetName, boolean removeDataset, String... dirs);
+    <T> void delete(DataTypeEnum type, String datasetName, boolean removeDataset, String... dirs);
 
     /**
      * Update the dataset for a single dataset.
@@ -44,7 +45,7 @@ public interface NMDDatasetDao {
      * @param dirs
      * @param data
      */
-    <T> void update(String type, String datasetName, T data, String... dirs);
+    <T> void update(DataTypeEnum type, String datasetName, T data, String... dirs);
 
     /**
      * Insert a single dataset.
@@ -59,7 +60,7 @@ public interface NMDDatasetDao {
      * @param data
      * @param dirs
      */
-    <T> void insert(String writeRole, String readRole, String owner, String type, String datasetName, T data, boolean addDataset, String... dirs);
+    <T> void insert(String writeRole, String readRole, String owner, DataTypeEnum type, String datasetName, T data, boolean addDataset, String... dirs);
 
     /**
      * Does the data exist.
@@ -69,7 +70,7 @@ public interface NMDDatasetDao {
      * @param dirs
      * @return
      */
-    boolean hasData(String type, String datasetName, String... dirs);
+    boolean hasData(DataTypeEnum type, String datasetName, String... dirs);
 
     /**
      * Returns a list of files for a specific series. It uses pre.data.dir to
@@ -87,7 +88,7 @@ public interface NMDDatasetDao {
      * @param dirs
      * @return
      */
-    DatasetsType getDatasetsByType(String type, String... dirs);
+    DatasetsType getDatasetsByType(DataTypeEnum type, String... dirs);
 
     /**
      *
@@ -96,7 +97,7 @@ public interface NMDDatasetDao {
      * @param dirs
      * @return
      */
-    DatasetType getDatasetByName(String type, String datasetName, String... dirs);
+    DatasetType getDatasetByName(DataTypeEnum type, String datasetName, String... dirs);
 
 
     /**
@@ -115,7 +116,7 @@ public interface NMDDatasetDao {
      * @param dirs
      * @return
      */
-    boolean hasWriteAccess(Collection<String> authorities, String type, String datasetName, String... dirs);
+    boolean hasWriteAccess(Collection<String> authorities, DataTypeEnum type, String datasetName, String... dirs);
 
     /**
      *
@@ -125,7 +126,7 @@ public interface NMDDatasetDao {
      * @param dirs
      * @return
      */
-    boolean hasReadAccess(Collection<String> authorities, String type, String datasetName, String... dirs);
+    boolean hasReadAccess(Collection<String> authorities, DataTypeEnum type, String datasetName, String... dirs);
 
     /**
      *
@@ -142,7 +143,7 @@ public interface NMDDatasetDao {
      * @param cruisenr
      * @return
      */
-    <T> T getByCruisenr(String type, String datasetName, String cruisenr);
+    <T> T getByCruisenr(DataTypeEnum type, String datasetName, String cruisenr);
 
     /**
      *
@@ -151,7 +152,7 @@ public interface NMDDatasetDao {
      * @param cruisenr
      * @return
      */
-    boolean hasDataByCruisenr(String type, String datasetName, String cruisenr);
+    boolean hasDataByCruisenr(DataTypeEnum type, String datasetName, String cruisenr);
 
     /**
      *
@@ -160,7 +161,7 @@ public interface NMDDatasetDao {
      * @param dirs
      * @return
      */
-    String getRootNamespace(String type, String datasetName, String... dirs);
+    String getRootNamespace(DataTypeEnum type, String datasetName, String... dirs);
 
     /**
      *
@@ -169,14 +170,14 @@ public interface NMDDatasetDao {
      * @param dirs
      * @return
      */
-    long getLastModified(String type, String datasetName, String... dirs);
+    long getLastModified(DataTypeEnum type, String datasetName, String... dirs);
 
     /**
-     * 
+     *
      * @param type
      * @param datasetName
      * @param dirs
      * @return
      */
-    long getChecksum(String type, String datasetName, String... dirs);
+    long getChecksum(DataTypeEnum type, String datasetName, String... dirs);
 }

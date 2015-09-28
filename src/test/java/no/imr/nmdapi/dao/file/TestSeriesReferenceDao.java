@@ -1,5 +1,6 @@
 package no.imr.nmdapi.dao.file;
 
+import no.imr.nmd.commons.dataset.jaxb.DataTypeEnum;
 import no.imr.nmdapi.dao.file.TestSeriesReferenceDao.Init;
 import no.imr.nmdapi.dao.file.config.CommonDaoConfig;
 import org.apache.commons.configuration.Configuration;
@@ -42,9 +43,9 @@ public class TestSeriesReferenceDao {
         TestType testData = new TestType();
         testData.setData("test");
         if (seriesReferenceDao.hasData("test data")) {
-            seriesReferenceDao.delete("test", "test data", true);
+            seriesReferenceDao.delete(DataTypeEnum.BIOTIC, "test data", true);
         }
-        seriesReferenceDao.insert("writeRole", "unrestricted", "imr", "test", "test data", testData, true);
+        seriesReferenceDao.insert("writeRole", "unrestricted", "imr", DataTypeEnum.BIOTIC, "test data", testData, true);
         TestType testRes = seriesReferenceDao.get("test data");
         assertEquals(testData.getData(), testRes.getData());
     }

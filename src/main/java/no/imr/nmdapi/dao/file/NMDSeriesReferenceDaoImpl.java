@@ -16,6 +16,7 @@ import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import no.imr.nmd.commons.dataset.jaxb.DataTypeEnum;
 import no.imr.nmd.commons.dataset.jaxb.DatasetType;
 import no.imr.nmd.commons.dataset.jaxb.DatasetsType;
 import no.imr.nmd.commons.dataset.jaxb.QualityEnum;
@@ -72,7 +73,7 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
         }
     }
 
-    public <T> void delete(String type, String datasetName, boolean removeDataset) {
+    public <T> void delete(DataTypeEnum type, String datasetName, boolean removeDataset) {
         File file = getFile(datasetName);
         if (!file.exists()) {
             throw new NotFoundException(file.getName().concat(" ").concat(" was not found."));
@@ -96,7 +97,7 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
         }
     }
 
-    public <T> void insert(String writeRole, String readRole, String owner, String type, String datasetName, T data, boolean addDataset) {
+    public <T> void insert(String writeRole, String readRole, String owner, DataTypeEnum type, String datasetName, T data, boolean addDataset) {
         File file = getFile(datasetName);
         if (file.exists()) {
             throw new AlreadyExistsException(file.getName().concat(" already exist."));
@@ -160,12 +161,12 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
         }
     }
 
-    private void removeDataset(String type, String datasetName) {
+    private void removeDataset(DataTypeEnum type, String datasetName) {
         File file = getDatasetFile();
         DatasetsType datasets = unmarshall(file);
         for (int i = 0; i < datasets.getDataset().size(); i++) {
             DatasetType datasetType = datasets.getDataset().get(i);
-            if (datasetType.getDataType().equalsIgnoreCase(type) && datasetType.getDatasetName().equalsIgnoreCase(datasetName)) {
+            if (datasetType.getDataType().equals(type) && datasetType.getDatasetName().equalsIgnoreCase(datasetName)) {
                 datasets.getDataset().remove(i);
             }
         }
@@ -178,9 +179,9 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
         }
     }
 
-    private void addDataset(String writeRole, String readRole, String owner, String type, String datasetName) {
+    private void addDataset(String writeRole, String readRole, String owner, DataTypeEnum type, String datasetName) {
         DatasetType datasetType = new DatasetType();
-        String id = "no:imr:".concat(type.toLowerCase()).concat(":").concat(java.util.UUID.randomUUID().toString());
+        String id = "no:imr:".concat(type.toString().toLowerCase()).concat(":").concat(java.util.UUID.randomUUID().toString());
         datasetType.setId(id);
         XMLGregorianCalendar cal;
         try {
@@ -191,12 +192,12 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
             LOG.error("Error setting created time. ", ex);
             throw new S2DException("Error creating datatype.", ex);
         }
-        datasetType.setDescription("Datasett for ".concat(type));
+        datasetType.setDescription("Datasett for ".concat(type.toString().toLowerCase()));
         RestrictionsType restrictions = new RestrictionsType();
         restrictions.setRead(readRole);
         restrictions.setWrite(writeRole);
         datasetType.setRestrictions(restrictions);
-        datasetType.setDataType(type.toLowerCase());
+        datasetType.setDataType(type);
         datasetType.setQualityAssured(QualityEnum.NONE);
         datasetType.setOwner(owner);
         datasetType.setDatasetName(datasetName);
@@ -228,7 +229,7 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
         return new File(builder.toString());
     }
 
-    public boolean hasWriteAccess(Collection<String> authorities, String type, String datasetName) {
+    public boolean hasWriteAccess(Collection<String> authorities, DataTypeEnum type, String datasetName) {
         boolean access = false;
         DatasetType datasetType = getDatasetByName(type, datasetName);
         if (datasetType.getRestrictions() != null && datasetType.getRestrictions().getWrite() != null) {
@@ -243,7 +244,7 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
         return access;
     }
 
-    public boolean hasReadAccess(Collection<String> authorities, String type, String datasetName) {
+    public boolean hasReadAccess(Collection<String> authorities, DataTypeEnum type, String datasetName) {
         boolean access = false;
         DatasetType datasetType = getDatasetByName(type, datasetName);
         if (datasetType != null) {
@@ -262,7 +263,7 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
         return access;
     }
 
-    private DatasetType getDatasetByName(String type, String datasetName) {
+    private DatasetType getDatasetByName(DataTypeEnum type, String datasetName) {
         DatasetsType datasetsType = getDatasets();
         for (DatasetType datasetType : datasetsType.getDataset()) {
             if (datasetType.getDataType().equals(type) && datasetType.getDatasetName().equals(datasetName)) {

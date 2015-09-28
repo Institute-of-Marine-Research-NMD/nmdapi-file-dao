@@ -24,6 +24,7 @@ import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import no.imr.nmd.commons.dataset.jaxb.DataTypeEnum;
 import no.imr.nmd.commons.dataset.jaxb.DatasetType;
 import no.imr.nmd.commons.dataset.jaxb.DatasetsType;
 import no.imr.nmd.commons.dataset.jaxb.QualityEnum;
@@ -63,13 +64,13 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
     @Autowired
     private Configuration configuration;
 
-    private File getFile(String type, String datasetName, String... dirs) {
+    private File getFile(DataTypeEnum type, String datasetName, String... dirs) {
         StringBuilder builder = new StringBuilder();
         builder.append(configuration.getString(PRE_DATA_DIR)).append(File.separator);
         for (String name : dirs) {
             builder.append(name).append(File.separator);
         }
-        builder.append(type).append(File.separator);
+        builder.append(type.toString().toLowerCase()).append(File.separator);
         builder.append(datasetName.concat(".xml"));
         return new File(builder.toString());
     }
@@ -93,7 +94,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         return new File(builder.toString());
     }
 
-    public <T> T get(String type, String datasetName, String... dirs) {
+    public <T> T get(DataTypeEnum type, String datasetName, String... dirs) {
         File file = getFile(type, datasetName, dirs);
         if (file.exists()) {
             return unmarshall(file);
@@ -102,7 +103,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         }
     }
 
-    public String getRootNamespace(String type, String datasetName, String... dirs) {
+    public String getRootNamespace(DataTypeEnum type, String datasetName, String... dirs) {
         File file = getFile(type, datasetName, dirs);
         if (file.exists()) {
             Object o = unmarshall(file);
@@ -114,7 +115,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         }
     }
 
-    public <T> T getByCruisenr(String type, String datasetName, String cruisenr) {
+    public <T> T getByCruisenr(DataTypeEnum type, String datasetName, String cruisenr) {
         File file = getFileByCruisenr(type, datasetName, cruisenr);
         if (file.exists()) {
             return unmarshall(file);
@@ -123,7 +124,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         }
     }
 
-    public boolean hasDataByCruisenr(String type, String datasetName, String cruisenr) {
+    public boolean hasDataByCruisenr(DataTypeEnum type, String datasetName, String cruisenr) {
         File file = getFileByCruisenr(type, datasetName, cruisenr);
         return file.exists();
     }
@@ -165,7 +166,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         }
     }
 
-    public <T> void delete(String type, String datasetName, boolean removeDataset, String... dirs) {
+    public <T> void delete(DataTypeEnum type, String datasetName, boolean removeDataset, String... dirs) {
         File file = getFile(type, datasetName, dirs);
         if (!file.exists()) {
             throw new NotFoundException(file.getName().concat(" ").concat(" was not found."));
@@ -180,12 +181,12 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         }
     }
 
-    public <T> void update(String type, String datasetName, T data, String... names) {
+    public <T> void update(DataTypeEnum type, String datasetName, T data, String... names) {
         File file = getFile(type, datasetName, names);
         marshall(data, file);
     }
 
-    public <T> void insert(String writeRole, String readRole, String owner, String type, String datasetName, T data, boolean addDataset, String... dirs) {
+    public <T> void insert(String writeRole, String readRole, String owner, DataTypeEnum type, String datasetName, T data, boolean addDataset, String... dirs) {
         File file = getFile(type, datasetName, dirs);
         if (file.exists()) {
             throw new AlreadyExistsException(file.getName().concat(" already exist."));
@@ -195,7 +196,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         addDataset(writeRole, readRole, owner, type, datasetName, dirs);
     }
 
-    public boolean hasData(String type, String datasetName, String... names) {
+    public boolean hasData(DataTypeEnum type, String datasetName, String... names) {
         File file = getFile(type, datasetName, names);
         return file.exists();
     }
@@ -207,9 +208,9 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         return result;
     }
 
-    private void addDataset(String writeRole, String readRole, String owner, String type, String datasetName, String... dirs) {
+    private void addDataset(String writeRole, String readRole, String owner, DataTypeEnum type, String datasetName, String... dirs) {
         DatasetType datasetType = new DatasetType();
-        String id = "no:imr:".concat(type.toLowerCase()).concat(":").concat(java.util.UUID.randomUUID().toString());
+        String id = "no:imr:".concat(type.toString()).concat(":").concat(java.util.UUID.randomUUID().toString());
         datasetType.setId(id);
         XMLGregorianCalendar cal;
         try {
@@ -220,12 +221,12 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
             LOG.error("Error setting created time. ", ex);
             throw new S2DException("Error creating datatype.", ex);
         }
-        datasetType.setDescription("Datasett for ".concat(type));
+        datasetType.setDescription("Datasett for ".concat(type.toString()));
         RestrictionsType restrictions = new RestrictionsType();
         restrictions.setRead(readRole);
         restrictions.setWrite(writeRole);
         datasetType.setRestrictions(restrictions);
-        datasetType.setDataType(type.toLowerCase());
+        datasetType.setDataType(type);
         datasetType.setQualityAssured(QualityEnum.NONE);
         datasetType.setOwner(owner);
         datasetType.setDatasetName(datasetName);
@@ -241,12 +242,12 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         marshall(datasetsType, file);
     }
 
-    private void removeDataset(String type, String datasetName, String... dirs) {
+    private void removeDataset(DataTypeEnum type, String datasetName, String... dirs) {
         File file = getDatasetFile(dirs);
         DatasetsType datasets = unmarshall(file);
         for (int i = 0; i < datasets.getDataset().size(); i++) {
             DatasetType datasetType = datasets.getDataset().get(i);
-            if (datasetType.getDataType().equalsIgnoreCase(type) && datasetType.getDatasetName().equalsIgnoreCase(datasetName)) {
+            if (datasetType.getDataType().equals(type) && datasetType.getDatasetName().equalsIgnoreCase(datasetName)) {
                 datasets.getDataset().remove(i);
             }
         }
@@ -259,14 +260,14 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         }
     }
 
-    public DatasetsType getDatasetsByType(String type, String... dirs) {
+    public DatasetsType getDatasetsByType(DataTypeEnum type, String... dirs) {
         File file = getDatasetFile(dirs);
         DatasetsType datasetsType = unmarshall(file);
         ListIterator<DatasetType> it = datasetsType.getDataset().listIterator();
         List<DatasetType> datasetsOfType = new ArrayList<DatasetType>();
         while (it.hasNext()) {
             DatasetType datasetType = it.next();
-            if (datasetType.getDataType().equalsIgnoreCase(type)) {
+            if (datasetType.getDataType().equals(type)) {
                 datasetsOfType.add(datasetType);
             }
         }
@@ -280,7 +281,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         return unmarshall(file);
     }
 
-    public boolean hasWriteAccess(Collection<String> authorities, String type, String datasetName, String... dirs) {
+    public boolean hasWriteAccess(Collection<String> authorities, DataTypeEnum type, String datasetName, String... dirs) {
         boolean access = false;
         DatasetType datasetType = getDatasetByName(type, datasetName, dirs);
         if (datasetType.getRestrictions() != null && datasetType.getRestrictions().getWrite() != null) {
@@ -295,7 +296,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         return access;
     }
 
-    public boolean hasReadAccess(Collection<String> authorities, String type, String datasetName, String... dirs) {
+    public boolean hasReadAccess(Collection<String> authorities, DataTypeEnum type, String datasetName, String... dirs) {
         boolean access = false;
         DatasetType datasetType = getDatasetByName(type, datasetName, dirs);
         if (datasetType != null && datasetType.getRestrictions() != null && datasetType.getRestrictions().getRead() != null) {
@@ -310,17 +311,17 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         return access;
     }
 
-    public DatasetType getDatasetByName(String type, String datasetName, String... dirs) {
+    public DatasetType getDatasetByName(DataTypeEnum type, String datasetName, String... dirs) {
         DatasetsType datasetsType = getDatasetsByType(type, dirs);
         for (DatasetType datasetType : datasetsType.getDataset()) {
-            if (datasetType.getDataType().equalsIgnoreCase(type) && datasetType.getDatasetName() != null && datasetType.getDatasetName().equalsIgnoreCase(datasetName)) {
+            if (datasetType.getDataType().equals(type) && datasetType.getDatasetName() != null && datasetType.getDatasetName().equalsIgnoreCase(datasetName)) {
                 return datasetType;
             }
         }
         return null;
     }
 
-    private File getFileByCruisenr(String type, String datasetName, String cruisenr) {
+    private File getFileByCruisenr(DataTypeEnum type, String datasetName, String cruisenr) {
         String predir = configuration.getString("pre.data.dir");
         Finder finder = new Finder(cruisenr);
         try {
@@ -330,7 +331,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
             throw new S2DException("Error finding cruisenr", ex);
         }
         if (finder.getPath() != null) {
-            File file = new File(finder.getPath().toString().concat(File.separator).concat(type).concat(File.separator).concat(datasetName).concat(".xml"));
+            File file = new File(finder.getPath().toString().concat(File.separator).concat(type.name().toLowerCase()).concat(File.separator).concat(datasetName).concat(".xml"));
             LOG.info("get file: " + file.getAbsolutePath());
             return file;
         } else {
@@ -346,7 +347,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
             boolean removed = false;
             while (iterator.hasNext()) {
                 DatasetType dataset = iterator.next();
-                if (dataset.getId().equalsIgnoreCase(data.getId()) && dataset.getDataType().equalsIgnoreCase(data.getDataType())) {
+                if (dataset.getId().equalsIgnoreCase(data.getId()) && dataset.getDataType().equals(data.getDataType())) {
                     removed = true;
                     iterator.remove();
                 }
@@ -363,7 +364,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
     }
 
     @Override
-    public long getLastModified(String type, String datasetName, String... dirs) {
+    public long getLastModified(DataTypeEnum type, String datasetName, String... dirs) {
         File file = getFile(type, datasetName, dirs);
         if (file.exists()) {
             return file.lastModified();
@@ -373,7 +374,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
     }
 
     @Override
-    public long getChecksum(String type, String datasetName, String... dirs) {
+    public long getChecksum(DataTypeEnum type, String datasetName, String... dirs) {
         File file = getFile(type, datasetName, dirs);
         if (file.exists()) {
             try {
