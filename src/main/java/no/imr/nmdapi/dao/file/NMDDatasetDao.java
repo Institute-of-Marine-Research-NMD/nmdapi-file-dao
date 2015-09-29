@@ -1,5 +1,6 @@
 package no.imr.nmdapi.dao.file;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import no.imr.nmd.commons.dataset.jaxb.DataTypeEnum;
@@ -141,18 +142,20 @@ public interface NMDDatasetDao {
      * @param type
      * @param datasetName
      * @param cruisenr
+     * @param shipname
      * @return
      */
-    <T> T getByCruisenr(DataTypeEnum type, String datasetName, String cruisenr);
+    Path getByCruisenr(DataTypeEnum type, String datasetName, String cruisenr, String shipname);
 
     /**
      *
      * @param type
      * @param datasetName
      * @param cruisenr
+     * @param shipname
      * @return
      */
-    boolean hasDataByCruisenr(DataTypeEnum type, String datasetName, String cruisenr);
+    boolean hasDataByCruisenr(DataTypeEnum type, String datasetName, String cruisenr, String shipname);
 
     /**
      *

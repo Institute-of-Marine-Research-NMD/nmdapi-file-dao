@@ -34,6 +34,7 @@ import no.imr.nmdapi.exceptions.NotFoundException;
 import no.imr.nmdapi.exceptions.S2DException;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +56,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
     private static final String DATASET_FILENAME = "data.xml";
 
     /**
-     * Pre data dir property name.
+     * Pre data dir property cruisenr.
      */
     private static final String PRE_DATA_DIR = "pre.data.dir";
     /**
@@ -115,17 +116,13 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         }
     }
 
-    public <T> T getByCruisenr(DataTypeEnum type, String datasetName, String cruisenr) {
-        File file = getFileByCruisenr(type, datasetName, cruisenr);
-        if (file.exists()) {
-            return unmarshall(file);
-        } else {
-            throw new NotFoundException("Not found: " + file.getAbsolutePath());
-        }
+    public Path getByCruisenr(DataTypeEnum type, String datasetName, String cruisenr, String shipname) {
+        return getFileByCruisenr(type, cruisenr, shipname);
     }
 
-    public boolean hasDataByCruisenr(DataTypeEnum type, String datasetName, String cruisenr) {
-        File file = getFileByCruisenr(type, datasetName, cruisenr);
+    public boolean hasDataByCruisenr(DataTypeEnum type, String datasetName, String cruisenr, String shipname) {
+        Path path = getFileByCruisenr(type, cruisenr, shipname);
+        File file = new File(path.toString().concat(File.separator).concat(type.name().toLowerCase()).concat(File.separator).concat(datasetName).concat(".xml"));
         return file.exists();
     }
 
@@ -321,9 +318,9 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         return null;
     }
 
-    private File getFileByCruisenr(DataTypeEnum type, String datasetName, String cruisenr) {
+    private Path getFileByCruisenr(DataTypeEnum type, String cruisenr, String shipname) {
         String predir = configuration.getString("pre.data.dir");
-        Finder finder = new Finder(cruisenr);
+        Finder finder = new Finder(cruisenr, shipname, type);
         try {
             Files.walkFileTree(Paths.get(predir), finder);
         } catch (IOException ex) {
@@ -331,9 +328,8 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
             throw new S2DException("Error finding cruisenr", ex);
         }
         if (finder.getPath() != null) {
-            File file = new File(finder.getPath().toString().concat(File.separator).concat(type.name().toLowerCase()).concat(File.separator).concat(datasetName).concat(".xml"));
-            LOG.info("get file: " + file.getAbsolutePath());
-            return file;
+            LOG.info("get file: " + finder.getPath().toString());
+            return finder.getPath();
         } else {
             throw new NotFoundException("Cruisenr not found: " + cruisenr);
         }
@@ -390,30 +386,43 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
     public static class Finder
             extends SimpleFileVisitor<Path> {
 
-        private final String name;
+        private final String cruisenr;
+
+        private final String shipname;
+
+        private final DataTypeEnum type;
 
         private Path path;
 
-        public Finder(String name) {
-            this.name = name;
+        private int initPath = -1;
+
+        public Finder(String cruisenr, String shipname, DataTypeEnum type) {
+            this.cruisenr = cruisenr;
+            this.shipname = shipname;
+            this.type = type;
         }
 
         @Override
         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-            String regex = "[0-9]{4}";
-            if (dir.getFileName().toString().matches(regex)) {
-                if (name.substring(0, 4).equals(dir.getFileName().toString())) {
-                    return FileVisitResult.CONTINUE;
-                } else {
-                    return FileVisitResult.SKIP_SUBTREE;
-                }
+            if (initPath == -1) {
+                initPath = dir.getNameCount();
+            }
+            String searchShipName = this.shipname.replace(".", " ");
+            if ((dir.getNameCount() - initPath) == 0) {
+                return FileVisitResult.CONTINUE;
+            } else if ((dir.getNameCount() - initPath) == 1) {
+                return FileVisitResult.CONTINUE;
+            } else if ((dir.getNameCount() - initPath) == 2 && StringUtils.equals(dir.getName(dir.getNameCount()-1).toString(), cruisenr.substring(0,4))) {
+                return FileVisitResult.CONTINUE;
+            } else if ((dir.getNameCount() - initPath) == 3 && StringUtils.containsIgnoreCase(dir.getName(dir.getNameCount()-1).toString(), searchShipName)) {
+                return FileVisitResult.CONTINUE;
+            } else if ((dir.getNameCount() - initPath) == 4 && StringUtils.equals(dir.getName(dir.getNameCount()-1).toString(), cruisenr)) {
+                return FileVisitResult.CONTINUE;
+            } else if ((dir.getNameCount() - initPath) == 5 && StringUtils.equalsIgnoreCase(dir.getName(dir.getNameCount()-1).toString(), type.toString())) {
+                this.path = dir;
+                return FileVisitResult.TERMINATE;
             } else {
-                if (dir.getFileName().toString().equals(name)) {
-                    this.path = dir;
-                    return FileVisitResult.TERMINATE;
-                } else {
-                    return FileVisitResult.CONTINUE;
-                }
+                return FileVisitResult.SKIP_SUBTREE;
             }
         }
 
