@@ -5,6 +5,7 @@ import java.util.List;
 import no.imr.nmd.commons.dataset.jaxb.DataTypeEnum;
 import no.imr.nmd.commons.dataset.jaxb.DatasetType;
 import no.imr.nmd.commons.dataset.jaxb.DatasetsType;
+import org.springframework.core.io.Resource;
 
 /**
  * This handles generic marshall and unmarshall objects to the
@@ -124,4 +125,14 @@ public interface NMDSeriesReferenceDao {
      */
     String getRootNamespace(String datasetName);
 
+    /**
+     * Get binary file using name and subname.
+     *
+     * @param name
+     * @param subname
+     * @return
+     */
+    Resource getFileResource(String name, String type, String subname, String filename);
+
 }
+

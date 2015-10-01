@@ -29,6 +29,8 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 
 /**
  *
@@ -344,5 +346,16 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
         } else {
             throw new NotFoundException("Data not found.");
         }
+    }
+
+    @Override
+    public Resource getFileResource(String name, String type, String subname, String filename) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(configuration.getString(PRE_DATA_DIR)).append(File.separator);
+        builder.append(name).append(File.separator);
+        builder.append(type).append(File.separator);
+        builder.append(subname).append(File.separator);
+        builder.append(filename);
+        return new FileSystemResource(new File(builder.toString()));
     }
 }
