@@ -200,44 +200,6 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         return result;
     }
 
-    public void modifyDataset(String writeRole, String readRole, String description, String owner, QualityEnum quality, DataTypeEnum type, String datasetName, XMLGregorianCalendar cal, String... dirs) {
-        DatasetType datasetType = new DatasetType();
-        datasetType.setCreated(cal);
-        datasetType.setUpdated(cal);
-        datasetType.setDescription(description);
-        RestrictionsType restrictions = new RestrictionsType();
-        restrictions.setRead(readRole);
-        restrictions.setWrite(writeRole);
-        datasetType.setRestrictions(restrictions);
-        datasetType.setDataType(type);
-        datasetType.setQualityAssured(quality);
-        datasetType.setOwner(owner);
-        datasetType.setDatasetName(datasetName);
-        String id = "no:imr:".concat(type.toString()).concat(":").concat(java.util.UUID.randomUUID().toString());
-        datasetType.setId(id);
-        File file = getDatasetFile(dirs);
-        DatasetsType datasetsType;
-
-        if (file.exists()) {
-            datasetsType = unmarshall(file);
-            ListIterator<DatasetType> it = datasetsType.getDataset().listIterator();
-            List<DatasetType> datasets = new ArrayList<DatasetType>();
-            while (it.hasNext()) {
-                DatasetType itDatasetType = it.next();
-                if (itDatasetType.getDataType().equals(type) && itDatasetType.getDatasetName().equals(datasetName)) {
-                    datasetType.setCreated(itDatasetType.getCreated());
-                    datasetType.setId(itDatasetType.getId());
-                    it.remove();
-                }
-            }
-            datasetsType.getDataset().add(datasetType);
-        } else {
-            datasetsType = new DatasetsType();
-            datasetsType.getDataset().add(datasetType);
-        }
-        marshall(datasetsType, file);
-    }
-
     public void removeDataset(DataTypeEnum type, String datasetName, String... dirs) {
         File file = getDatasetFile(dirs);
         DatasetsType datasets = unmarshall(file);
@@ -355,6 +317,65 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
             }
         } else {
             throw new NotFoundException("File was not found.");
+        }
+    }
+
+    public void createDataset(String writeRole, String readRole, String description, String owner, QualityEnum quality, DataTypeEnum type, String datasetName, XMLGregorianCalendar cal, String... dirs) {
+        if (!hasDataset(type, datasetName, dirs)) {
+            DatasetType datasetType = new DatasetType();
+            datasetType.setCreated(cal);
+            datasetType.setUpdated(cal);
+            datasetType.setDescription(description);
+            RestrictionsType restrictions = new RestrictionsType();
+            restrictions.setRead(readRole);
+            restrictions.setWrite(writeRole);
+            datasetType.setRestrictions(restrictions);
+            datasetType.setDataType(type);
+            datasetType.setQualityAssured(quality);
+            datasetType.setOwner(owner);
+            datasetType.setDatasetName(datasetName);
+            String id = "no:imr:".concat(type.toString()).concat(":").concat(java.util.UUID.randomUUID().toString());
+            datasetType.setId(id);
+            File file = getDatasetFile(dirs);
+            DatasetsType datasetsType;
+
+            if (file.exists()) {
+                datasetsType = unmarshall(file);
+                datasetsType.getDataset().add(datasetType);
+            } else {
+                datasetsType = new DatasetsType();
+                datasetsType.getDataset().add(datasetType);
+            }
+            marshall(datasetsType, file);
+        } else {
+            throw new S2DException("Dataset already exists.");
+        }
+    }
+
+    public void updateDataset(DataTypeEnum type, String datasetName, XMLGregorianCalendar cal, String... dirs) {
+        if (hasDataset(type, datasetName, dirs)) {
+            File file = getDatasetFile(dirs);
+            DatasetsType datasetsType = getDatasets(dirs);
+            ListIterator<DatasetType> it = datasetsType.getDataset().listIterator();
+            boolean found = false;
+            while (it.hasNext()) {
+                DatasetType datasetType = it.next();
+                if (datasetType.getDataType().equals(type) && datasetType.getDatasetName().equals(datasetName)) {
+                    found = true;
+                    datasetType.setUpdated(cal);
+                }
+            }
+            marshall(datasetsType, file);
+        } else {
+            throw new S2DException("Dataset does not exist.");
+        }
+    }
+
+    public boolean hasDataset(DataTypeEnum type, String datasetName, String... dirs) {
+        if (getDatasetByName(type, datasetName, dirs) != null) {
+            return true;
+        } else {
+            return false;
         }
     }
 

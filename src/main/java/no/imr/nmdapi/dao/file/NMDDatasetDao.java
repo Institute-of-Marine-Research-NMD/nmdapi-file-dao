@@ -164,7 +164,26 @@ public interface NMDDatasetDao {
      * @param dirs
      * @param cal
      */
-    void modifyDataset(String writeRole, String readRole, String description, String owner, QualityEnum quality, DataTypeEnum type, String datasetName, XMLGregorianCalendar cal, String... dirs);
+    void createDataset(String writeRole, String readRole, String description, String owner, QualityEnum quality, DataTypeEnum type, String datasetName, XMLGregorianCalendar cal, String... dirs);
+
+    /**
+     *
+     * @param type
+     * @param datasetName
+     * @param cal
+     * @param dirs
+     */
+    void updateDataset(DataTypeEnum type, String datasetName, XMLGregorianCalendar cal, String... dirs);
+
+    /**
+     * 
+     * @param type
+     * @param datasetName
+     * @param dirs
+     * @return
+     */
+    boolean hasDataset(DataTypeEnum type, String datasetName, String... dirs);
+
     /**
      *
      * @param type
@@ -181,7 +200,7 @@ public interface NMDDatasetDao {
     DatasetsType getDatasets(String... dirs);
 
     /**
-     * 
+     *
      * @param type
      * @param datasetName
      * @param dirs

@@ -1,8 +1,5 @@
 package no.imr.nmdapi.dao.file;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import no.imr.nmd.commons.dataset.jaxb.DataTypeEnum;
 import no.imr.nmd.commons.dataset.jaxb.DatasetType;
 import no.imr.nmd.commons.dataset.jaxb.QualityEnum;
@@ -15,8 +12,12 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -86,15 +87,19 @@ public class TestDatasetDao {
      */
     @Test
     public void testInsertTwoDatasetsOfSameType() {
-        nmdDataDao.modifyDataset("Write", "Read", "", "imr", QualityEnum.NONE,DataTypeEnum.BIOTIC, "data", null, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
+        nmdDataDao.removeDataset(DataTypeEnum.BIOTIC, "data", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
+        assertFalse(nmdDataDao.hasDataset(DataTypeEnum.BIOTIC, "data", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101"));
+        nmdDataDao.createDataset("Write", "Read", "", "imr", QualityEnum.NONE,DataTypeEnum.BIOTIC, "data", null, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
         DatasetType dataset = nmdDataDao.getDatasetByName(DataTypeEnum.BIOTIC, "data", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
+        assertTrue(nmdDataDao.hasDataset(DataTypeEnum.BIOTIC, "data", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101"));
         assertNotNull(dataset.getId());
         assertEquals("Read", dataset.getRestrictions().getRead());
         assertEquals("Write", dataset.getRestrictions().getWrite());
         assertEquals(QualityEnum.NONE, dataset.getQualityAssured());
-        nmdDataDao.modifyDataset("Write", "Read2", "", "imr", QualityEnum.NONE,DataTypeEnum.BIOTIC, "data", null, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
+        nmdDataDao.updateDataset(DataTypeEnum.BIOTIC, "data", null, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
+        assertTrue(nmdDataDao.hasDataset(DataTypeEnum.BIOTIC, "data", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101"));
         DatasetType dataset2 = nmdDataDao.getDatasetByName(DataTypeEnum.BIOTIC, "data", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
-        assertEquals("Read2", dataset2.getRestrictions().getRead());
+        assertEquals("Read", dataset2.getRestrictions().getRead());
         assertEquals("Write", dataset2.getRestrictions().getWrite());
         assertEquals(QualityEnum.NONE, dataset2.getQualityAssured());
         assertEquals(dataset.getId(), dataset2.getId());
