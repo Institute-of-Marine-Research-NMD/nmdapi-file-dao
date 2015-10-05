@@ -179,7 +179,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         marshall(data, file);
     }
 
-    public <T> void insert(String writeRole, String readRole, String owner, DataTypeEnum type, String datasetName, T data, boolean addDataset, String... dirs) {
+    public <T> void insert(DataTypeEnum type, String datasetName, T data, String... dirs) {
         File file = getFile(type, datasetName, dirs);
         if (file.exists()) {
             throw new AlreadyExistsException(file.getName().concat(" already exist."));

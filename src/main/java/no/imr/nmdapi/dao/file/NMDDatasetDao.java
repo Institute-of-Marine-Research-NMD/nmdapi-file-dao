@@ -54,16 +54,12 @@ public interface NMDDatasetDao {
      * Insert a single dataset.
      *
      * @param <T>
-     * @param writeRole
-     * @param readRole
-     * @param owner
      * @param type
      * @param datasetName
-     * @param addDataset
      * @param data
      * @param dirs
      */
-    <T> void insert(String writeRole, String readRole, String owner, DataTypeEnum type, String datasetName, T data, boolean addDataset, String... dirs);
+    <T> void insert(DataTypeEnum type, String datasetName, T data, String... dirs);
 
     /**
      * Does the data exist.
@@ -106,7 +102,6 @@ public interface NMDDatasetDao {
 
     /**
      *
-     * @param <T>
      * @param type
      * @param datasetName
      * @param cruisenr
@@ -176,7 +171,7 @@ public interface NMDDatasetDao {
     void updateDataset(DataTypeEnum type, String datasetName, XMLGregorianCalendar cal, String... dirs);
 
     /**
-     * 
+     *
      * @param type
      * @param datasetName
      * @param dirs

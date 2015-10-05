@@ -11,13 +11,8 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,7 +51,7 @@ public class TestDatasetDao {
     public void testInsertUpdateDelete() {
         TestType testData = new TestType();
         testData.setData("test");
-        nmdDataDao.insert("writeRole", "unrestricted", "imr", DataTypeEnum.BIOTIC, "test data", testData, true, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
+        nmdDataDao.insert(DataTypeEnum.BIOTIC, "test data", testData, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
         TestType testRes = nmdDataDao.get(DataTypeEnum.BIOTIC, "test data", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
         assertEquals(testData.getData(), testRes.getData());
     }
@@ -77,8 +72,8 @@ public class TestDatasetDao {
     public void testDoubleInsert() {
         TestType testData = new TestType();
         testData.setData("test");
-        nmdDataDao.insert("writeRole", "unrestricted", "imr", DataTypeEnum.BIOTIC, "test data", testData, true, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
-        nmdDataDao.insert("writeRole", "unrestricted", "imr", DataTypeEnum.BIOTIC, "test data", testData, true, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
+        nmdDataDao.insert(DataTypeEnum.BIOTIC, "test data", testData, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
+        nmdDataDao.insert(DataTypeEnum.BIOTIC, "test data", testData, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
 
     }
 
