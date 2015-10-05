@@ -11,8 +11,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.GregorianCalendar;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import javax.xml.bind.JAXBContext;
@@ -21,8 +19,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlSchema;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import no.imr.nmd.commons.dataset.jaxb.DataTypeEnum;
 import no.imr.nmd.commons.dataset.jaxb.DatasetType;
@@ -143,7 +139,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
                 throw new S2DException("Could not get data.");
             }
         } else {
-            return ((T)new DatasetsType());
+            return ((T) new DatasetsType());
         }
     }
 
@@ -152,6 +148,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         try {
             JAXBContext context = JAXBContext.newInstance(packages);
             Marshaller jaxbMarshaller = context.createMarshaller();
+            if (file.getParentFile().mkdirs());
             file.createNewFile();
             jaxbMarshaller.marshal(data, file);
         } catch (JAXBException ex) {
@@ -169,7 +166,6 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
             throw new NotFoundException(file.getName().concat(" ").concat(" was not found."));
         }
         file.delete();
-        removeDataset(type, datasetName, dirs);
         File parentFile = file.getParentFile();
         while (parentFile.list().length == 0) {
             File deleteFile = parentFile;
@@ -190,7 +186,6 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         }
         file.getParentFile().mkdirs();
         marshall(data, file);
-        addDataset(writeRole, readRole, owner, type, datasetName, dirs);
     }
 
     public boolean hasData(DataTypeEnum type, String datasetName, String... names) {
@@ -205,32 +200,36 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         return result;
     }
 
-    private void addDataset(String writeRole, String readRole, String owner, DataTypeEnum type, String datasetName, String... dirs) {
+    public void modifyDataset(String writeRole, String readRole, String description, String owner, QualityEnum quality, DataTypeEnum type, String datasetName, XMLGregorianCalendar cal, String... dirs) {
         DatasetType datasetType = new DatasetType();
-        String id = "no:imr:".concat(type.toString()).concat(":").concat(java.util.UUID.randomUUID().toString());
-        datasetType.setId(id);
-        XMLGregorianCalendar cal;
-        try {
-            cal = DatatypeFactory.newInstance().newXMLGregorianCalendar((GregorianCalendar) GregorianCalendar.getInstance());
-            datasetType.setCreated(cal);
-            datasetType.setUpdated(cal);
-        } catch (DatatypeConfigurationException ex) {
-            LOG.error("Error setting created time. ", ex);
-            throw new S2DException("Error creating datatype.", ex);
-        }
-        datasetType.setDescription("Datasett for ".concat(type.toString()));
+        datasetType.setCreated(cal);
+        datasetType.setUpdated(cal);
+        datasetType.setDescription(description);
         RestrictionsType restrictions = new RestrictionsType();
         restrictions.setRead(readRole);
         restrictions.setWrite(writeRole);
         datasetType.setRestrictions(restrictions);
         datasetType.setDataType(type);
-        datasetType.setQualityAssured(QualityEnum.NONE);
+        datasetType.setQualityAssured(quality);
         datasetType.setOwner(owner);
         datasetType.setDatasetName(datasetName);
+        String id = "no:imr:".concat(type.toString()).concat(":").concat(java.util.UUID.randomUUID().toString());
+        datasetType.setId(id);
         File file = getDatasetFile(dirs);
         DatasetsType datasetsType;
+
         if (file.exists()) {
             datasetsType = unmarshall(file);
+            ListIterator<DatasetType> it = datasetsType.getDataset().listIterator();
+            List<DatasetType> datasets = new ArrayList<DatasetType>();
+            while (it.hasNext()) {
+                DatasetType itDatasetType = it.next();
+                if (itDatasetType.getDataType().equals(type) && itDatasetType.getDatasetName().equals(datasetName)) {
+                    datasetType.setCreated(itDatasetType.getCreated());
+                    datasetType.setId(itDatasetType.getId());
+                    it.remove();
+                }
+            }
             datasetsType.getDataset().add(datasetType);
         } else {
             datasetsType = new DatasetsType();
@@ -239,7 +238,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         marshall(datasetsType, file);
     }
 
-    private void removeDataset(DataTypeEnum type, String datasetName, String... dirs) {
+    public void removeDataset(DataTypeEnum type, String datasetName, String... dirs) {
         File file = getDatasetFile(dirs);
         DatasetsType datasets = unmarshall(file);
         for (int i = 0; i < datasets.getDataset().size(); i++) {
@@ -335,30 +334,6 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         }
     }
 
-    public void updateDataset(DatasetType data, String... dirs) {
-        File file = getDatasetFile(dirs);
-        if (file.exists()) {
-            DatasetsType datasets = unmarshall(file);
-            Iterator<DatasetType> iterator = datasets.getDataset().iterator();
-            boolean removed = false;
-            while (iterator.hasNext()) {
-                DatasetType dataset = iterator.next();
-                if (dataset.getId().equalsIgnoreCase(data.getId()) && dataset.getDataType().equals(data.getDataType())) {
-                    removed = true;
-                    iterator.remove();
-                }
-            }
-            if (removed) {
-                datasets.getDataset().add(data);
-                marshall(datasets, file);
-            } else {
-                throw new NotFoundException("Dataset was not found.");
-            }
-        } else {
-            throw new NotFoundException("Dataset not found");
-        }
-    }
-
     @Override
     public long getLastModified(DataTypeEnum type, String datasetName, String... dirs) {
         File file = getFile(type, datasetName, dirs);
@@ -412,13 +387,13 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
                 return FileVisitResult.CONTINUE;
             } else if ((dir.getNameCount() - initPath) == 1) {
                 return FileVisitResult.CONTINUE;
-            } else if ((dir.getNameCount() - initPath) == 2 && StringUtils.equals(dir.getName(dir.getNameCount()-1).toString(), cruisenr.substring(0,4))) {
+            } else if ((dir.getNameCount() - initPath) == 2 && StringUtils.equals(dir.getName(dir.getNameCount() - 1).toString(), cruisenr.substring(0, 4))) {
                 return FileVisitResult.CONTINUE;
-            } else if ((dir.getNameCount() - initPath) == 3 && StringUtils.containsIgnoreCase(dir.getName(dir.getNameCount()-1).toString(), searchShipName)) {
+            } else if ((dir.getNameCount() - initPath) == 3 && StringUtils.containsIgnoreCase(dir.getName(dir.getNameCount() - 1).toString(), searchShipName)) {
                 return FileVisitResult.CONTINUE;
-            } else if ((dir.getNameCount() - initPath) == 4 && StringUtils.equals(dir.getName(dir.getNameCount()-1).toString(), cruisenr)) {
+            } else if ((dir.getNameCount() - initPath) == 4 && StringUtils.equals(dir.getName(dir.getNameCount() - 1).toString(), cruisenr)) {
                 return FileVisitResult.CONTINUE;
-            } else if ((dir.getNameCount() - initPath) == 5 && StringUtils.equalsIgnoreCase(dir.getName(dir.getNameCount()-1).toString(), type.toString())) {
+            } else if ((dir.getNameCount() - initPath) == 5 && StringUtils.equalsIgnoreCase(dir.getName(dir.getNameCount() - 1).toString(), type.toString())) {
                 this.path = dir;
                 return FileVisitResult.TERMINATE;
             } else {

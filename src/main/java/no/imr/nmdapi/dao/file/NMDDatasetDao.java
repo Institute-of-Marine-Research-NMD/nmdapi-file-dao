@@ -3,9 +3,11 @@ package no.imr.nmdapi.dao.file;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
+import javax.xml.datatype.XMLGregorianCalendar;
 import no.imr.nmd.commons.dataset.jaxb.DataTypeEnum;
 import no.imr.nmd.commons.dataset.jaxb.DatasetType;
 import no.imr.nmd.commons.dataset.jaxb.DatasetsType;
+import no.imr.nmd.commons.dataset.jaxb.QualityEnum;
 
 /**
  * This handles generic marshall and unmarshall objects to the
@@ -83,33 +85,6 @@ public interface NMDDatasetDao {
     List<String> list(String... dirs);
 
     /**
-     *  Get all datasets.
-     *
-     * @param type
-     * @param dirs
-     * @return
-     */
-    DatasetsType getDatasetsByType(DataTypeEnum type, String... dirs);
-
-    /**
-     *
-     * @param type
-     * @param datasetName
-     * @param dirs
-     * @return
-     */
-    DatasetType getDatasetByName(DataTypeEnum type, String datasetName, String... dirs);
-
-
-    /**
-     *  Get all datasets.
-     *
-     * @param dirs
-     * @return
-     */
-    DatasetsType getDatasets(String... dirs);
-
-    /**
      *
      * @param authorities
      * @param type
@@ -128,13 +103,6 @@ public interface NMDDatasetDao {
      * @return
      */
     boolean hasReadAccess(Collection<String> authorities, DataTypeEnum type, String datasetName, String... dirs);
-
-    /**
-     *
-     * @param data
-     * @param dirs
-     */
-    void updateDataset(DatasetType data, String... dirs);
 
     /**
      *
@@ -183,4 +151,42 @@ public interface NMDDatasetDao {
      * @return
      */
     long getChecksum(DataTypeEnum type, String datasetName, String... dirs);
+
+    /**
+     *
+     * @param writeRole
+     * @param readRole
+     * @param description
+     * @param owner
+     * @param quality
+     * @param type
+     * @param datasetName
+     * @param dirs
+     * @param cal
+     */
+    void modifyDataset(String writeRole, String readRole, String description, String owner, QualityEnum quality, DataTypeEnum type, String datasetName, XMLGregorianCalendar cal, String... dirs);
+    /**
+     *
+     * @param type
+     * @param datasetName
+     * @param dirs
+     */
+    void removeDataset(DataTypeEnum type, String datasetName, String... dirs);
+
+    /**
+     *
+     * @param dirs
+     * @return
+     */
+    DatasetsType getDatasets(String... dirs);
+
+    /**
+     * 
+     * @param type
+     * @param datasetName
+     * @param dirs
+     * @return
+     */
+    DatasetType getDatasetByName(DataTypeEnum type, String datasetName, String... dirs);
+
 }
