@@ -225,6 +225,9 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
     public DatasetsType getDatasetsByType(DataTypeEnum type, String... dirs) {
         File file = getDatasetFile(dirs);
         DatasetsType datasetsType = unmarshall(file);
+        if (datasetsType == null) {
+            return null;
+        }
         ListIterator<DatasetType> it = datasetsType.getDataset().listIterator();
         List<DatasetType> datasetsOfType = new ArrayList<DatasetType>();
         while (it.hasNext()) {
