@@ -150,7 +150,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
     private <T> void marshall(final Object data, final File file) {
         String packages = configuration.getString("app.packages");
         try {
-            JAXBContext context = JAXBContext.newInstance(packages);
+            JAXBContext context = JAXBContext.newInstance(data.getClass().getPackage().getName());
             Marshaller jaxbMarshaller = context.createMarshaller();
             if (file.getParentFile().mkdirs());
             file.createNewFile();
