@@ -1,5 +1,11 @@
 package no.imr.nmdapi.dao.file;
 
+import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 import no.imr.nmd.commons.dataset.jaxb.DataTypeEnum;
 import no.imr.nmd.commons.dataset.jaxb.DatasetType;
 import no.imr.nmd.commons.dataset.jaxb.QualityEnum;
@@ -11,8 +17,16 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -99,6 +113,25 @@ public class TestDatasetDao {
         assertEquals(QualityEnum.NONE, dataset2.getQualityAssured());
         assertEquals(dataset.getId(), dataset2.getId());
 
+    }
+
+    @Test
+    public void testInsertUpdateDataset() throws DatatypeConfigurationException {
+        nmdDataDao.removeDataset(DataTypeEnum.BIOTIC, "test", "test", "antoher");
+        nmdDataDao.removeDataset(DataTypeEnum.BIOTIC, "test", "test", "antohertwo");
+        GregorianCalendar  now1 = (GregorianCalendar) GregorianCalendar.getInstance();
+        now1.set(Calendar.YEAR, 2014);
+        XMLGregorianCalendar cal1 = DatatypeFactory.newInstance().newXMLGregorianCalendar(now1);
+        nmdDataDao.createDataset("write", "read", "description", "imr", QualityEnum.NONE, DataTypeEnum.BIOTIC, "test", cal1, "test", "antoher");
+        nmdDataDao.createDataset("write", "read", "description", "imr", QualityEnum.NONE, DataTypeEnum.BIOTIC, "test", cal1, "test", "antohertwo");
+        assertEquals(cal1, nmdDataDao.getDatasetByName(DataTypeEnum.BIOTIC, "test", "test", "antoher").getCreated());
+        assertEquals(cal1, nmdDataDao.getDatasetByName(DataTypeEnum.BIOTIC, "test", "test", "antohertwo").getCreated());
+        GregorianCalendar  now2 = (GregorianCalendar) GregorianCalendar.getInstance();
+        now2.set(Calendar.YEAR, 2015);
+        XMLGregorianCalendar cal2 = DatatypeFactory.newInstance().newXMLGregorianCalendar(now2);
+        nmdDataDao.updateDataset(DataTypeEnum.BIOTIC, "test", cal2, "test", "antoher");
+        assertEquals(cal2, nmdDataDao.getDatasetByName(DataTypeEnum.BIOTIC, "test", "test", "antoher").getUpdated());
+        assertEquals(cal1, nmdDataDao.getDatasetByName(DataTypeEnum.BIOTIC, "test", "test", "antohertwo").getUpdated());
     }
 
 }
