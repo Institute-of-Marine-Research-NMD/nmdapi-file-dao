@@ -1,6 +1,5 @@
 package no.imr.nmdapi.dao.file;
 
-import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -17,16 +16,8 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -112,7 +103,9 @@ public class TestDatasetDao {
         assertEquals("Write", dataset2.getRestrictions().getWrite());
         assertEquals(QualityEnum.NONE, dataset2.getQualityAssured());
         assertEquals(dataset.getId(), dataset2.getId());
-
+        dataset.setDescription("test description");
+        nmdDataDao.updateDataset(dataset, "Forskningsdata", "2015", "G O Sars_LMEL", "2015101");
+        assertEquals("test description", nmdDataDao.getDatasetByName(DataTypeEnum.BIOTIC, "data", "Forskningsdata", "2015", "G O Sars_LMEL", "2015101").getDescription());
     }
 
     @Test

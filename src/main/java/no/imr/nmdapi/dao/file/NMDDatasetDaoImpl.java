@@ -11,14 +11,18 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.logging.Level;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlSchema;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import no.imr.nmd.commons.dataset.jaxb.DataTypeEnum;
 import no.imr.nmd.commons.dataset.jaxb.DatasetType;
@@ -377,6 +381,34 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         } else {
             return false;
         }
+    }
+
+    public void updateDataset(DatasetType dataset, String... container) {
+        File file = getDatasetFile(container);
+        DatasetsType datasetsType = getDatasets(container);
+        ListIterator<DatasetType> it = datasetsType.getDataset().listIterator();
+        boolean found = false;
+        while (it.hasNext()) {
+                DatasetType testDatasetType = it.next();
+                if (dataset.getDataType().equals(testDatasetType.getDataType())
+                        && dataset.getDatasetName().equals(testDatasetType.getDatasetName())
+                        && dataset.getId().equals(testDatasetType.getId())) {
+                    try {
+                        found = true;
+                        GregorianCalendar cal = new GregorianCalendar();
+                        dataset.setUpdated(DatatypeFactory.newInstance().newXMLGregorianCalendar(cal));
+                        it.remove();
+                    } catch (DatatypeConfigurationException ex) {
+                        LOG.warn("Could not set updated time.", ex);
+                    }
+                }
+            }
+            if (!found) {
+                LOG.info("Could not find dataset.");
+                throw new NotFoundException("Could not find dataset.");
+            }
+            datasetsType.getDataset().add(dataset);
+            marshall(datasetsType, file);
     }
 
     public static class Finder

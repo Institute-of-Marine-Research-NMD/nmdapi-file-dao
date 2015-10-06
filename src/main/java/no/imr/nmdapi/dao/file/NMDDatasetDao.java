@@ -188,6 +188,14 @@ public interface NMDDatasetDao {
     void removeDataset(DataTypeEnum type, String datasetName, String... dirs);
 
     /**
+     * This method required that id, datasettype and name is equal.
+     *
+     * @param dataset
+     * @param container
+     */
+    void updateDataset(DatasetType datase, String... container);
+
+    /**
      *
      * @param dirs
      * @return
