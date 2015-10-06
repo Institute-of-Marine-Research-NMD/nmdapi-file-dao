@@ -4,7 +4,7 @@
     <parent>
         <groupId>no.imr.nmdapi.web</groupId>
         <artifactId>nmdapi-parent</artifactId>
-        <version>0.0.3</version>
+        <version>0.0.9</version>
     </parent>
     <groupId>no.imr.nmdapi.dao.file</groupId>
     <artifactId>nmdapi-file-dao</artifactId>
@@ -37,7 +37,7 @@
     </scm>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jaxb.version>2.1.17</jaxb.version>
+        <jaxb.version>2.2.11</jaxb.version>
         <additionalparam>-Xdoclint:none</additionalparam>
     </properties>
     <build>
@@ -97,5 +97,6 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
+
     </dependencies>
 </project>
