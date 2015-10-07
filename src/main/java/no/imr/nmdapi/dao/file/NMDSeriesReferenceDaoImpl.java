@@ -172,7 +172,7 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
                 datasets.getDataset().remove(i);
             }
         }
-        if (datasets.getDataset().size() > 0) {
+        if (!datasets.getDataset().isEmpty()) {
             // Marshall updated dataset file.
             marshall(datasets, file);
         } else {
@@ -235,7 +235,7 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
         boolean access = false;
         DatasetType datasetType = getDatasetByName(type, datasetName);
         if (datasetType.getRestrictions() != null && datasetType.getRestrictions().getWrite() != null) {
-            if (datasetType.getRestrictions().getWrite().equals("unrestricted")) {
+            if ("unrestricted".equals(datasetType.getRestrictions().getWrite())) {
                 access = true;
             } else if (authorities.contains(datasetType.getRestrictions().getWrite())) {
                 access = true;
@@ -251,7 +251,7 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
         DatasetType datasetType = getDatasetByName(type, datasetName);
         if (datasetType != null) {
             if (datasetType.getRestrictions() != null && datasetType.getRestrictions().getRead() != null) {
-                if (datasetType.getRestrictions().getRead().equals("unrestricted")) {
+                if ("unrestricted".equals(datasetType.getRestrictions().getRead())) {
                     access = true;
                 } else if (authorities.contains(datasetType.getRestrictions().getRead())) {
                     access = true;
@@ -324,7 +324,7 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
             try {
                 return FileUtils.checksumCRC32(file);
             } catch (IOException ex) {
-                throw new S2DException("Application error occured when generating checksum.");
+                throw new S2DException("Application error occured when generating checksum.", ex);
             }
         } else {
             throw new NotFoundException("File was not found.");
