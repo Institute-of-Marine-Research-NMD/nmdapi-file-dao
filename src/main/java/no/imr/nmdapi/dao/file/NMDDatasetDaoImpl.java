@@ -142,7 +142,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
                 throw new S2DException("Could not get data.");
             }
         } else {
-            return ((T) new DatasetsType());
+            return (T)new DatasetsType();
         }
     }
 
@@ -439,6 +439,14 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
          *
          */
         private static final int CONTAINER_DATATYPE = 5;
+        /**
+         *
+         */
+        private static final int CRUISENR_TO_YEAR_PRE_INDEX = 0;
+        /**
+         * 
+         */
+        private static final int CRUISENR_TO_YEAR_POST_INDEX = 4;
 
         private final String cruisenr;
 
@@ -466,7 +474,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
                 return FileVisitResult.CONTINUE;
             } else if ((dir.getNameCount() - initPath) == CONTAINER_MISSIONTYPE) {
                 return FileVisitResult.CONTINUE;
-            } else if ((dir.getNameCount() - initPath) == CONTAINER_YEAR && StringUtils.equals(dir.getName(dir.getNameCount() - 1).toString(), cruisenr.substring(0, 4))) {
+            } else if ((dir.getNameCount() - initPath) == CONTAINER_YEAR && StringUtils.equals(dir.getName(dir.getNameCount() - 1).toString(), cruisenr.substring(CRUISENR_TO_YEAR_PRE_INDEX, CRUISENR_TO_YEAR_POST_INDEX))) {
                 return FileVisitResult.CONTINUE;
             } else if ((dir.getNameCount() - initPath) == CONTAINER_PLATFORM && StringUtils.containsIgnoreCase(dir.getName(dir.getNameCount() - 1).toString(), searchShipName)) {
                 return FileVisitResult.CONTINUE;
