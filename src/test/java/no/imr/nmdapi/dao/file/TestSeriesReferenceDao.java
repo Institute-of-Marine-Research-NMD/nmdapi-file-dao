@@ -42,11 +42,14 @@ public class TestSeriesReferenceDao {
     public void testInsertUpdateDelete() {
         TestType testData = new TestType();
         testData.setData("test");
-        if (seriesReferenceDao.hasData("test data")) {
-            seriesReferenceDao.delete(DataTypeEnum.BIOTIC, "test data", true);
+        if (seriesReferenceDao.hasData("datasetname")) {
+            seriesReferenceDao.delete(DataTypeEnum.BIOTIC, "datasetname", true);
         }
-        seriesReferenceDao.insert("writeRole", "unrestricted", "imr", DataTypeEnum.BIOTIC, "test data", testData, true);
-        TestType testRes = seriesReferenceDao.get("test data");
+        int numBefore = seriesReferenceDao.getDatasets().getDataset().size();
+        seriesReferenceDao.insert("writeRole", "unrestricted", "imr", DataTypeEnum.BIOTIC, "datasetname", testData, true);
+        int numAfter = seriesReferenceDao.getDatasets().getDataset().size();
+        assertEquals(numBefore + 1, numAfter);
+        TestType testRes = seriesReferenceDao.get("datasetname");
         assertEquals(testData.getData(), testRes.getData());
     }
 

@@ -166,19 +166,25 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
     private void removeDataset(DataTypeEnum type, String datasetName) {
         File file = getDatasetFile();
         DatasetsType datasets = unmarshall(file);
-        for (int i = 0; i < datasets.getDataset().size(); i++) {
-            DatasetType datasetType = datasets.getDataset().get(i);
-            if (datasetType.getDataType().equals(type) && datasetType.getDatasetName().equalsIgnoreCase(datasetName)) {
-                datasets.getDataset().remove(i);
+        if (datasets != null) {
+            for (int i = 0; i < datasets.getDataset().size(); i++) {
+                DatasetType datasetType = datasets.getDataset().get(i);
+                if (datasetType.getDataType().equals(type) && datasetType.getDatasetName().equalsIgnoreCase(datasetName)) {
+                    datasets.getDataset().remove(i);
+                }
             }
-        }
-        if (!datasets.getDataset().isEmpty()) {
-            // Marshall updated dataset file.
-            marshall(datasets, file);
+            if (!datasets.getDataset().isEmpty()) {
+                // Marshall updated dataset file.
+                marshall(datasets, file);
+            } else {
+                // remove fe if no datasets exist.
+                file.delete();
+            }
         } else {
-            // remove fe if no datasets exist.
-            file.delete();
+            LOG.error("Did not find dataset ".concat(type.name()).concat(" ").concat(datasetName));
+            throw new NotFoundException("Did not find dataset ".concat(type.name()).concat(" ").concat(datasetName));
         }
+
     }
 
     private void addDataset(String writeRole, String readRole, String owner, DataTypeEnum type, String datasetName) {
