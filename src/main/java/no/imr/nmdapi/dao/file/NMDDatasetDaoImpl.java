@@ -147,7 +147,6 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
     }
 
     private <T> void marshall(final Object data, final File file) {
-        String packages = configuration.getString("app.packages");
         try {
             JAXBContext context = JAXBContext.newInstance(data.getClass().getPackage().getName());
             Marshaller jaxbMarshaller = context.createMarshaller();
@@ -371,7 +370,12 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
                     datasetType.setUpdated(cal);
                 }
             }
-            marshall(datasetsType, file);
+            if (found) {
+                marshall(datasetsType, file);
+            } else {
+                LOG.error("Dataset could not be updated.".concat(dirs.toString()).concat(" ").concat(type.name()));
+                throw new NotFoundException("Dataset could not be updated.".concat(Arrays.toString(dirs)).concat(" ").concat(type.name()));
+            }
         } else {
             throw new S2DException("Dataset does not exist.");
         }
