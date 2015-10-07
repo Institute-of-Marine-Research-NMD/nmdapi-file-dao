@@ -151,7 +151,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         try {
             JAXBContext context = JAXBContext.newInstance(data.getClass().getPackage().getName());
             Marshaller jaxbMarshaller = context.createMarshaller();
-            if (file.getParentFile().mkdirs());
+            file.getParentFile().mkdirs();
             file.createNewFile();
             jaxbMarshaller.marshal(data, file);
         } catch (JAXBException ex) {
@@ -212,7 +212,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
                 datasets.getDataset().remove(i);
             }
         }
-        if (datasets.getDataset().size() > 0) {
+        if (!datasets.getDataset().isEmpty()) {
             // Marshall updated dataset file.
             marshall(datasets, file);
         } else {
@@ -391,30 +391,50 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         ListIterator<DatasetType> it = datasetsType.getDataset().listIterator();
         boolean found = false;
         while (it.hasNext()) {
-                DatasetType testDatasetType = it.next();
-                if (dataset.getDataType().equals(testDatasetType.getDataType())
-                        && dataset.getDatasetName().equals(testDatasetType.getDatasetName())
-                        && dataset.getId().equals(testDatasetType.getId())) {
-                    try {
-                        found = true;
-                        GregorianCalendar cal = new GregorianCalendar();
-                        dataset.setUpdated(DatatypeFactory.newInstance().newXMLGregorianCalendar(cal));
-                        it.remove();
-                    } catch (DatatypeConfigurationException ex) {
-                        LOG.warn("Could not set updated time.", ex);
-                    }
+            DatasetType testDatasetType = it.next();
+            if (dataset.getDataType().equals(testDatasetType.getDataType())
+                    && dataset.getDatasetName().equals(testDatasetType.getDatasetName())
+                    && dataset.getId().equals(testDatasetType.getId())) {
+                try {
+                    found = true;
+                    GregorianCalendar cal = new GregorianCalendar();
+                    dataset.setUpdated(DatatypeFactory.newInstance().newXMLGregorianCalendar(cal));
+                    it.remove();
+                } catch (DatatypeConfigurationException ex) {
+                    LOG.warn("Could not set updated time.", ex);
                 }
             }
-            if (!found) {
-                LOG.info("Could not find dataset.");
-                throw new NotFoundException("Could not find dataset.");
-            }
-            datasetsType.getDataset().add(dataset);
-            marshall(datasetsType, file);
+        }
+        if (!found) {
+            LOG.info("Could not find dataset.");
+            throw new NotFoundException("Could not find dataset.");
+        }
+        datasetsType.getDataset().add(dataset);
+        marshall(datasetsType, file);
     }
 
     public static class Finder
             extends SimpleFileVisitor<Path> {
+        /**
+         * Container missiontype.
+         */
+        private static final int CONTAINER_MISSIONTYPE = 1;
+        /**
+         *
+         */
+        private static final int CONTAINER_YEAR = 2;
+        /**
+         *
+         */
+        private static final int CONTAINER_PLATFORM = 3;
+        /**
+         *
+         */
+        private static final int CONTAINER_DELIVERY = 4;
+        /**
+         *
+         */
+        private static final int CONTAINER_DATATYPE = 5;
 
         private final String cruisenr;
 
@@ -440,15 +460,15 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
             String searchShipName = this.shipname.replace(".", " ");
             if ((dir.getNameCount() - initPath) == 0) {
                 return FileVisitResult.CONTINUE;
-            } else if ((dir.getNameCount() - initPath) == 1) {
+            } else if ((dir.getNameCount() - initPath) == CONTAINER_MISSIONTYPE) {
                 return FileVisitResult.CONTINUE;
-            } else if ((dir.getNameCount() - initPath) == 2 && StringUtils.equals(dir.getName(dir.getNameCount() - 1).toString(), cruisenr.substring(0, 4))) {
+            } else if ((dir.getNameCount() - initPath) == CONTAINER_YEAR && StringUtils.equals(dir.getName(dir.getNameCount() - 1).toString(), cruisenr.substring(0, 4))) {
                 return FileVisitResult.CONTINUE;
-            } else if ((dir.getNameCount() - initPath) == 3 && StringUtils.containsIgnoreCase(dir.getName(dir.getNameCount() - 1).toString(), searchShipName)) {
+            } else if ((dir.getNameCount() - initPath) == CONTAINER_PLATFORM && StringUtils.containsIgnoreCase(dir.getName(dir.getNameCount() - 1).toString(), searchShipName)) {
                 return FileVisitResult.CONTINUE;
-            } else if ((dir.getNameCount() - initPath) == 4 && StringUtils.equals(dir.getName(dir.getNameCount() - 1).toString(), cruisenr)) {
+            } else if ((dir.getNameCount() - initPath) == CONTAINER_DELIVERY && StringUtils.equals(dir.getName(dir.getNameCount() - 1).toString(), cruisenr)) {
                 return FileVisitResult.CONTINUE;
-            } else if ((dir.getNameCount() - initPath) == 5 && StringUtils.equalsIgnoreCase(dir.getName(dir.getNameCount() - 1).toString(), type.toString())) {
+            } else if ((dir.getNameCount() - initPath) == CONTAINER_DATATYPE && StringUtils.equalsIgnoreCase(dir.getName(dir.getNameCount() - 1).toString(), type.toString())) {
                 this.path = dir;
                 return FileVisitResult.TERMINATE;
             } else {
