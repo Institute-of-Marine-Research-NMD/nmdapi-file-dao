@@ -169,7 +169,7 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
         if (datasets != null) {
             for (int i = 0; i < datasets.getDataset().size(); i++) {
                 DatasetType datasetType = datasets.getDataset().get(i);
-                if (datasetType.getDataType().equals(type) && datasetType.getDatasetName().equalsIgnoreCase(datasetName)) {
+                if (datasetType.getDataType() != null && datasetType.getDatasetName() != null && datasetType.getDataType().equals(type) && datasetType.getDatasetName().equalsIgnoreCase(datasetName)) {
                     datasets.getDataset().remove(i);
                 }
             }
