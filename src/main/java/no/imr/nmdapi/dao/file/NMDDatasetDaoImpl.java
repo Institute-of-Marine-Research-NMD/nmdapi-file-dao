@@ -67,10 +67,12 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
     private File getFile(DataTypeEnum type, String datasetName, String... dirs) {
         StringBuilder builder = new StringBuilder();
         builder.append(configuration.getString(PRE_DATA_DIR)).append(File.separator);
-        for (String name : dirs) {
+        List<String> strs = new ArrayList<String>();
+        strs.addAll(Arrays.asList(dirs));
+        strs.add(4, type.name().toLowerCase());
+        for (String name : strs) {
             builder.append(name).append(File.separator);
         }
-        builder.append(type.toString().toLowerCase()).append(File.separator);
         builder.append(datasetName.concat(".xml"));
         return new File(builder.toString());
     }
@@ -444,7 +446,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
          */
         private static final int CRUISENR_TO_YEAR_PRE_INDEX = 0;
         /**
-         * 
+         *
          */
         private static final int CRUISENR_TO_YEAR_POST_INDEX = 4;
 
