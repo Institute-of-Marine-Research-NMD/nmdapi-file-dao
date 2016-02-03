@@ -23,6 +23,7 @@ public class TestSeriesReferenceDao {
 
     @org.springframework.context.annotation.Configuration
     public static class Init {
+
         @Bean
         public Configuration configuration() {
             Configuration cfg = new PropertiesConfiguration();
@@ -44,6 +45,10 @@ public class TestSeriesReferenceDao {
         testData.setData("test");
         if (seriesReferenceDao.hasData("datasetname")) {
             seriesReferenceDao.delete(DataTypeEnum.BIOTIC, "datasetname", true);
+        } else {
+            seriesReferenceDao.insert("writeRole", "unrestricted", "imr", DataTypeEnum.BIOTIC, "datasetname", testData, true);
+            seriesReferenceDao.insert("writeRole", "unrestricted", "imr", DataTypeEnum.BIOTIC, "datasetname2", testData, true);
+            seriesReferenceDao.delete(DataTypeEnum.BIOTIC, "datasetname", true);
         }
         int numBefore = seriesReferenceDao.getDatasets().getDataset().size();
         seriesReferenceDao.insert("writeRole", "unrestricted", "imr", DataTypeEnum.BIOTIC, "datasetname", testData, true);
@@ -52,6 +57,5 @@ public class TestSeriesReferenceDao {
         TestType testRes = seriesReferenceDao.get("datasetname");
         assertEquals(testData.getData(), testRes.getData());
     }
-
 
 }

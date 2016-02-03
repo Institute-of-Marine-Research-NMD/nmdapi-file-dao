@@ -144,7 +144,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
                 throw new S2DException("Could not get data.");
             }
         } else {
-            return (T)new DatasetsType();
+            return (T) new DatasetsType();
         }
     }
 
@@ -421,6 +421,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
 
     public static class Finder
             extends SimpleFileVisitor<Path> {
+
         /**
          * Container missiontype.
          */
@@ -450,6 +451,9 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
          */
         private static final int CRUISENR_TO_YEAR_POST_INDEX = 4;
 
+        private static final int CRUISENR_TO_YEAR_PRE_INDEX_FOREIGN = 5;
+        private static final int CRUISENR_TO_YEAR_POST_INDEX_FOREIGN = 9;
+
         private final String cruisenr;
 
         private final String shipname;
@@ -476,8 +480,14 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
                 return FileVisitResult.CONTINUE;
             } else if ((dir.getNameCount() - initPath) == CONTAINER_MISSIONTYPE) {
                 return FileVisitResult.CONTINUE;
-            } else if ((dir.getNameCount() - initPath) == CONTAINER_YEAR && StringUtils.equals(dir.getName(dir.getNameCount() - 1).toString(), cruisenr.substring(CRUISENR_TO_YEAR_PRE_INDEX, CRUISENR_TO_YEAR_POST_INDEX))) {
-                return FileVisitResult.CONTINUE;
+            } else if ((dir.getNameCount() - initPath) == CONTAINER_YEAR) {
+                String dirname = dir.getName(dir.getNameCount() - 1).toString();
+                String cruiseyear = cruisenr.contains("_") ? cruisenr.substring(CRUISENR_TO_YEAR_PRE_INDEX_FOREIGN, CRUISENR_TO_YEAR_POST_INDEX_FOREIGN) : cruisenr.substring(CRUISENR_TO_YEAR_PRE_INDEX, CRUISENR_TO_YEAR_POST_INDEX);
+                if (StringUtils.equals(dirname, cruiseyear)) {
+                    return FileVisitResult.CONTINUE;
+                } else {
+                    return FileVisitResult.SKIP_SUBTREE;
+                }
             } else if ((dir.getNameCount() - initPath) == CONTAINER_PLATFORM && StringUtils.equals(StringUtils.substringBefore(dir.getName(dir.getNameCount() - 1).toString(), "-"), searchShipName)) {
                 return FileVisitResult.CONTINUE;
             } else if ((dir.getNameCount() - initPath) == CONTAINER_DELIVERY && StringUtils.equals(dir.getName(dir.getNameCount() - 1).toString(), cruisenr)) {
