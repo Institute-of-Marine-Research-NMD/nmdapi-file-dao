@@ -39,6 +39,11 @@ import org.springframework.core.io.Resource;
 public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
 
     /**
+     * Default encoding used.
+     */
+    public static final String ENCODING = "UTF-8";
+
+    /**
      * Class logger.
      */
     private static final Logger LOG = LoggerFactory.getLogger(NMDDatasetDaoImpl.class);
@@ -152,6 +157,8 @@ public class NMDSeriesReferenceDaoImpl implements NMDSeriesReferenceDao {
         try {
             JAXBContext context = JAXBContext.newInstance(packages);
             Marshaller jaxbMarshaller = context.createMarshaller();
+            jaxbMarshaller.setProperty(Marshaller.JAXB_ENCODING, ENCODING);
+            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             file.createNewFile();
             jaxbMarshaller.marshal(data, file);
         } catch (JAXBException ex) {

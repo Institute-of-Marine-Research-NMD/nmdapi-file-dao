@@ -50,6 +50,11 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
     private static final Logger LOG = LoggerFactory.getLogger(NMDDatasetDaoImpl.class);
 
     /**
+     * Default encoding used.
+     */
+    public static final String ENCODING = "UTF-8";
+
+    /**
      * Dataset filename.
      */
     private static final String DATASET_FILENAME = "data.xml";
@@ -152,6 +157,8 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
         try {
             JAXBContext context = JAXBContext.newInstance(data.getClass().getPackage().getName());
             Marshaller jaxbMarshaller = context.createMarshaller();
+            jaxbMarshaller.setProperty(Marshaller.JAXB_ENCODING, ENCODING);
+            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             file.getParentFile().mkdirs();
             file.createNewFile();
             jaxbMarshaller.marshal(data, file);
