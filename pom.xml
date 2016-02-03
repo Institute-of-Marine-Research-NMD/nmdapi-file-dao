@@ -38,7 +38,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jaxb.version>2.2.11</jaxb.version>
-        <additionalparam>-Xdoclint:none</additionalparam>
     </properties>
     <build>
         <plugins>
