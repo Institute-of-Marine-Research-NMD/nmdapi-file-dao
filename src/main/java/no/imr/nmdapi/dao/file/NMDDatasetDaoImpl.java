@@ -488,7 +488,7 @@ public class NMDDatasetDaoImpl implements NMDDatasetDao {
                 } else {
                     return FileVisitResult.SKIP_SUBTREE;
                 }
-            } else if ((dir.getNameCount() - initPath) == CONTAINER_PLATFORM && StringUtils.equals(StringUtils.substringBefore(dir.getName(dir.getNameCount() - 1).toString(), "-"), searchShipName)) {
+            } else if ((dir.getNameCount() - initPath) == CONTAINER_PLATFORM && StringUtils.equals(StringUtils.substringBeforeLast(dir.getName(dir.getNameCount() - 1).toString(), "-"), searchShipName)) {
                 return FileVisitResult.CONTINUE;
             } else if ((dir.getNameCount() - initPath) == CONTAINER_DELIVERY && StringUtils.equals(dir.getName(dir.getNameCount() - 1).toString(), cruisenr)) {
                 return FileVisitResult.CONTINUE;
